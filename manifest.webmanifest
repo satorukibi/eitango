@@ -1,0 +1,19 @@
+{
+  "name": "英単語ドリル（ニュース頻出・中級）",
+  "short_name": "英単語",
+  "description": "AI・戦争などニュース頻出の中級英単語を学べるアプリ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
