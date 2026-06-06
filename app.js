@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "14";
+const APP_VERSION = "15";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000; // 「単語を全部読む」：各語の後に休む時間（1秒）
 const STORAGE_KEY = "eitango.learned.v1";

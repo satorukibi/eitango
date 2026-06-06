@@ -11,6 +11,7 @@
   --green-dark: #15803d;
   --line: #e2e8f0;
   --radius: 16px;
+  --content-width: 450px; /* 従来680pxの約2/3 */
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -34,6 +35,13 @@ html, body {
   color: #fff;
   padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
   border-bottom: 1px solid #334155;
+}
+
+.app-header > * {
+  max-width: var(--content-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .header-row {
@@ -181,7 +189,7 @@ html, body {
 
 /* ---------- カード一覧 ---------- */
 .card-list {
-  max-width: 680px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 14px 12px calc(env(safe-area-inset-bottom) + 40px);
   display: flex;
@@ -373,7 +381,7 @@ html, body {
 
 /* ---------- 完了画面 ---------- */
 .empty-state {
-  max-width: 680px;
+  max-width: var(--content-width);
   margin: 40px auto;
   padding: 30px 20px;
   text-align: center;
