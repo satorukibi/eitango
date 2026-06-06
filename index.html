@@ -4,27 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>英単語 - ニュース頻出（中級）</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=12" />
 </head>
 <body>
   <header class="app-header">
     <div class="header-row">
       <h1>英単語ドリル</h1>
-      <span class="subtitle">ニュース・AI・戦争 / 中級</span>
+      <span class="subtitle">ニュース・AI・戦争 / 中級 <span id="appVersion"></span></span>
     </div>
     <div class="header-stats">
       <span id="learnedCount">覚えた: 0</span>
       <span id="remainCount">残り: 0</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar" aria-hidden="true">
+      <div id="progressFill" class="progress-fill"></div>
     </div>
     <div class="header-actions">
+      <button id="readWordsBtn" class="btn btn-primary">▶ 単語を全部読む</button>
       <button id="readAllBtn" class="btn btn-primary">▶ 例文を全部読む</button>
       <button id="stopBtn" class="btn btn-ghost" hidden>■ 停止</button>
+      <button id="showAllBtn" class="btn btn-ghost">和訳を全部表示</button>
+      <button id="hideAllBtn" class="btn btn-ghost">和訳を隠す</button>
+      <button id="shuffleBtn" class="btn btn-ghost">別の12語</button>
+      <button id="learnedListBtn" class="btn btn-ghost">覚えた一覧</button>
       <button id="resetBtn" class="btn btn-ghost">リセット</button>
+      <button id="updateBtn" class="btn btn-ghost">🔄 最新版に更新</button>
       <button id="voiceInfoBtn" class="btn btn-ghost">🔧 音声情報</button>
     </div>
+    <div id="learnedPanel" class="learned-panel" hidden></div>
     <div id="voicePanel" class="voice-panel" hidden></div>
   </header>
 
@@ -35,7 +47,7 @@
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words.js"></script>
-  <script src="app.js"></script>
+  <script src="words.js?v=13"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
