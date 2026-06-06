@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "13";
+const APP_VERSION = "14";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000; // 「単語を全部読む」：各語の後に休む時間（1秒）
 const STORAGE_KEY = "eitango.learned.v1";
@@ -320,32 +320,31 @@ function createCard(wordIndex, displayNum) {
   card.dataset.index = wordIndex;
 
   card.innerHTML = `
-    <div class="card-top">
+    <div class="card-line word-line">
       <span class="num-badge">${displayNum}</span>
       <span class="word-en">${escapeHtml(w.en)}</span>
       <span class="word-pos">${escapeHtml(w.pos)}</span>
-      <button class="read-btn" data-read="word">🔊 読む</button>
+      <span class="word-kana">${escapeHtml(w.kana)}</span>
+      <button class="inline-btn" data-read="word">読む</button>
     </div>
-    <div class="word-kana">${escapeHtml(w.kana)}</div>
-
-    <div class="example">
-      <span class="example-en">${highlightWord(w.en, w.ex)}</span>
-      <button class="read-btn" data-read="ex">🔊 読む</button>
+    <div class="card-line btn-line">
+      <button class="reveal-btn" data-toggle="word">和訳する</button>
+      <button class="reveal-btn" data-synonym>類語を検索する</button>
     </div>
-
-    <div class="reveal" data-reveal="ex"><span class="label">例文の和訳</span>${escapeHtml(w.exJa)}</div>
     <div class="reveal" data-reveal="word"><span class="label">単語の意味</span>${escapeHtml(w.ja)}</div>
     <div class="reveal reveal-syn" data-reveal="syn"></div>
 
-    <div class="actions">
-      <div class="actions-row">
-        <button class="reveal-btn" data-toggle="ex">英文を和訳する</button>
-      </div>
-      <div class="actions-row">
-        <button class="reveal-btn" data-toggle="word">単語を和訳する</button>
-        <button class="reveal-btn" data-synonym>類語を検索する</button>
-        <button class="learned-btn" data-learned>覚えた</button>
-      </div>
+    <div class="card-line ex-line">
+      <span class="example-en">${highlightWord(w.en, w.ex)}</span>
+      <button class="inline-btn" data-read="ex">読む</button>
+    </div>
+    <div class="card-line btn-line">
+      <button class="reveal-btn" data-toggle="ex">和訳する</button>
+    </div>
+    <div class="reveal" data-reveal="ex"><span class="label">例文の和訳</span>${escapeHtml(w.exJa)}</div>
+
+    <div class="card-line btn-line">
+      <button class="learned-btn" data-learned>覚えた</button>
     </div>
   `;
 
