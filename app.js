@@ -6,11 +6,134 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "15";
+const APP_VERSION = "17";
 const CARDS_PER_PAGE = 12;
-const WORD_READ_PAUSE_MS = 1000; // 「単語を全部読む」：各語の後に休む時間（1秒）
+const WORD_READ_PAUSE_MS = 1000;
 const STORAGE_KEY = "eitango.learned.v1";
 const STORAGE_KEY_VISIBLE = "eitango.visible.v1";
+const STORAGE_KEY_CATEGORY = "eitango.category.v1";
+
+// ---- 属性（カテゴリ） ----
+const WORD_CATEGORIES = [
+  "すべて",
+  "ニュース",
+  "戦争",
+  "生活",
+  "学校",
+  "家庭",
+  "映画",
+  "音楽",
+  "美術・芸術",
+  "歴史",
+  "科学技術",
+  "経済"
+];
+
+// ---- 語源ルート（簡易・自動判定用） ----
+const ETYM_ROOTS = [
+  { key: "econom", label: "ギリシャ語 oikos+nomos（家の管理）→ 経済" },
+  { key: "techn", label: "ギリシャ語 techne（技）→ 技術" },
+  { key: "struct", label: "ラテン語 struere（建てる）" },
+  { key: "spect", label: "ラテン語 specere（見る）" },
+  { key: "milit", label: "ラテン語 miles（兵士）" },
+  { key: "sequ", label: "ラテン語 sequi（続く）" },
+  { key: "press", label: "ラテン語 premere（押す）" },
+  { key: "tract", label: "ラテン語 trahere（引く）" },
+  { key: "port", label: "ラテン語 portare（運ぶ）" },
+  { key: "dict", label: "ラテン語 dicere（言う）" },
+  { key: "ject", label: "ラテン語 jacere（投げる）" },
+  { key: "mit", label: "ラテン語 mittere（送る）" },
+  { key: "form", label: "ラテン語 forma（形）" },
+  { key: "fact", label: "ラテン語 facere（作る）" },
+  { key: "fer", label: "ラテン語 ferre（運ぶ）" },
+  { key: "duc", label: "ラテン語 ducere（導く）" },
+  { key: "vis", label: "ラテン語 videre（見る）" },
+  { key: "leg", label: "ラテン語 legere（読む・集める）" },
+  { key: "cred", label: "ラテン語 credere（信じる）" },
+  { key: "cap", label: "ラテン語 capere（取る）" },
+  { key: "tain", label: "ラテン語 tenere（保つ）" },
+  { key: "stat", label: "ラテン語 stare（立つ）" },
+  { key: "vert", label: "ラテン語 vertere（曲げる）" },
+  { key: "flu", label: "ラテン語 fluere（流れる）" },
+  { key: "cur", label: "ラテン語 currere（走る）" },
+  { key: "mob", label: "ラテン語 movere（動く）" },
+  { key: "nov", label: "ラテン語 novus（新）" },
+  { key: "fin", label: "ラテン語 finis（終わり・境界）" },
+  { key: "merc", label: "ラテン語 merx（商品）" },
+  { key: "terr", label: "ラテン語 terra（土地）" },
+  { key: "bell", label: "ラテン語 bellum（戦争）" },
+  { key: "bat", label: "ラテン語 battuere（打つ）" },
+  { key: "graph", label: "ギリシャ語 grapho（書く）" },
+  { key: "log", label: "ギリシャ語 logos（言葉・学問）" },
+  { key: "gen", label: "ギリシャ語 genos（生）" },
+  { key: "pol", label: "ギリシャ語 polis（都市）→ 政治" },
+  { key: "crac", label: "ギリシャ語 kratos（力・支配）" },
+  { key: "art", label: "ラテン語 ars（技・芸）" },
+  { key: "act", label: "ラテン語 agere（動く・行う）" }
+].sort((a, b) => b.key.length - a.key.length);
+
+const CAT_OVERRIDES = {
+  war: "戦争", peace: "ニュース", treaty: "歴史", alliance: "戦争",
+  market: "経済", trade: "経済", inflation: "経済", recession: "経済",
+  economy: "経済", economic: "経済", stock: "経済", profit: "経済",
+  budget: "経済", tax: "経済", debt: "経済", bank: "経済",
+  school: "学校", student: "学校", education: "学校",
+  family: "家庭", home: "家庭", parent: "家庭",
+  film: "映画", movie: "映画", music: "音楽", song: "音楽",
+  art: "美術・芸術", museum: "美術・芸術", history: "歴史", historical: "歴史",
+  food: "生活", health: "生活", weather: "生活", travel: "生活"
+};
+
+function detectEtymKey(en) {
+  const l = en.toLowerCase();
+  for (const r of ETYM_ROOTS) {
+    if (l.includes(r.key)) return r.key;
+  }
+  return "";
+}
+
+function etymLabel(en, manual) {
+  if (manual) return manual;
+  const key = detectEtymKey(en);
+  if (!key) return "";
+  const r = ETYM_ROOTS.find((x) => x.key === key);
+  return r ? r.label : "";
+}
+
+function catForWord(en) {
+  const l = en.toLowerCase();
+  if (CAT_OVERRIDES[l]) return CAT_OVERRIDES[l];
+  const rules = [
+    [/milit|weapon|missile|nuclear|invad|troop|soldier|combat|defen|sanction|regime|border|ceasefire|hostage|casualty|refugee|insurg|deter|annex|siege|offensive|atrocity|arsenal|warfare|^war$|battle|raid|airstrike|artillery/, "戦争"],
+    [/algorithm|digital|robot|software|network|cyber|data|tech|comput|autom|device|platform|innov|virtual|neural|chip|internet|encrypt|database|server|cloud|api|model|generate|code/, "科学技術"],
+    [/econom|market|trade|inflation|recess|stock|invest|profit|budget|tax|debt|financ|currency|fiscal|monet|bank|loan|deficit|subsid|revenue|tariff|export|import|commerce/, "経済"],
+    [/school|student|teacher|education|univers|college|classroom|exam|curriculum|academic/, "学校"],
+    [/family|parent|child|marriage|household|domestic|relative/, "家庭"],
+    [/film|movie|cinema|actor|director|screenplay|hollywood/, "映画"],
+    [/music|song|concert|orchestra|melody|album|singer|band/, "音楽"],
+    [/museum|gallery|sculpt|paint|aesthetic|design|artist|architect/, "美術・芸術"],
+    [/histor|ancient|century|colonial|empire|archaeolog|medieval|dynasty/, "歴史"],
+    [/food|daily|life|health|exercise|sleep|hobby|lifestyle|recipe|fitness/, "生活"]
+  ];
+  for (const [re, cat] of rules) {
+    if (re.test(l)) return cat;
+  }
+  return "ニュース";
+}
+
+function enrichWord(w) {
+  return {
+    ...w,
+    cat: w.cat || catForWord(w.en),
+    etymKey: w.etymKey || detectEtymKey(w.en),
+    etym: w.etym || etymLabel(w.en, w.etym)
+  };
+}
+
+function matchesCategory(wordIndex) {
+  if (selectedCategory === "すべて") return true;
+  return WORDS[wordIndex].cat === selectedCategory;
+}
 
 // ---- 重複(同じ英単語)を除いた単語プール ----
 const WORDS = (() => {
@@ -20,14 +143,15 @@ const WORDS = (() => {
     const key = w.en.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    list.push(w);
+    list.push(enrichWord(w));
   }
   return list;
 })();
 
 // ---- 状態 ----
-let learned = loadLearned();          // 覚えた単語(en小文字)の集合
-let visible = [];                     // 現在画面に出ている単語インデックスの配列
+let learned = loadLearned();
+let visible = [];
+let selectedCategory = loadCategory();
 
 // ---- 要素 ----
 const cardList = document.getElementById("cardList");
@@ -48,6 +172,8 @@ const progressPctEl = document.getElementById("progressPct");
 const progressFillEl = document.getElementById("progressFill");
 const appVersionEl = document.getElementById("appVersion");
 const updateBtn = document.getElementById("updateBtn");
+const catSelect = document.getElementById("catSelect");
+const catCountEl = document.getElementById("catCount");
 
 // ---- 進捗の保存/読み込み ----
 function loadLearned() {
@@ -64,6 +190,50 @@ function saveLearned() {
   } catch (e) {}
 }
 
+function loadCategory() {
+  try {
+    const c = localStorage.getItem(STORAGE_KEY_CATEGORY);
+    return WORD_CATEGORIES.includes(c) ? c : "すべて";
+  } catch (e) {
+    return "すべて";
+  }
+}
+
+function saveCategory() {
+  try {
+    localStorage.setItem(STORAGE_KEY_CATEGORY, selectedCategory);
+  } catch (e) {}
+}
+
+function poolWords() {
+  if (selectedCategory === "すべて") return WORDS;
+  return WORDS.filter((w) => w.cat === selectedCategory);
+}
+
+function initCategorySelect() {
+  if (!catSelect) return;
+  catSelect.innerHTML = WORD_CATEGORIES.map((c) => {
+    const n = c === "すべて" ? WORDS.length : WORDS.filter((w) => w.cat === c).length;
+    return `<option value="${c}">${c}（${n}語）</option>`;
+  }).join("");
+  catSelect.value = selectedCategory;
+  updateCatCount();
+  catSelect.addEventListener("change", () => {
+    selectedCategory = catSelect.value;
+    saveCategory();
+    updateCatCount();
+    stopSpeaking();
+    render(true);
+  });
+}
+
+function updateCatCount() {
+  if (!catCountEl) return;
+  const remain = unlearnedIndexes().length;
+  catCountEl.textContent =
+    selectedCategory === "すべて" ? "" : `この属性の残り ${remain}語`;
+}
+
 // 画面に出ている単語を保存/復元（開き直しても同じ単語を維持）
 function loadVisible() {
   try {
@@ -74,7 +244,7 @@ function loadVisible() {
     const indexes = [];
     for (const key of keys) {
       const idx = WORDS.findIndex((w) => w.en.toLowerCase() === key);
-      if (idx !== -1 && !learned.has(key)) indexes.push(idx);
+      if (idx !== -1 && !learned.has(key) && matchesCategory(idx)) indexes.push(idx);
     }
     return indexes.length > 0 ? indexes : null;
   } catch (e) {
@@ -99,7 +269,9 @@ function clearVisible() {
 function unlearnedIndexes() {
   const arr = [];
   for (let i = 0; i < WORDS.length; i++) {
-    if (!learned.has(WORDS[i].en.toLowerCase())) arr.push(i);
+    if (learned.has(WORDS[i].en.toLowerCase())) continue;
+    if (!matchesCategory(i)) continue;
+    arr.push(i);
   }
   return arr;
 }
@@ -312,6 +484,49 @@ function toggleSynonyms(card, wordIndex, btn) {
   btn.classList.toggle("done", show);
 }
 
+// ---- 似た語源の単語 ----
+function findSimilarEtymology(wordIndex, limit = 5) {
+  const target = WORDS[wordIndex];
+  if (!target.etymKey) return [];
+  const hits = [];
+  for (let i = 0; i < WORDS.length; i++) {
+    if (i === wordIndex) continue;
+    if (WORDS[i].etymKey === target.etymKey) hits.push(WORDS[i]);
+  }
+  return hits.slice(0, limit);
+}
+
+function formatEtymHtml(target, similar) {
+  let html = "";
+  if (target.etym) {
+    html += `<p class="etym-self">語源: ${escapeHtml(target.etym)}</p>`;
+  }
+  if (similar.length === 0) {
+    html += '<p class="syn-none">同じ語源の登録語は見つかりませんでした。</p>';
+    return html;
+  }
+  html += '<span class="label">似た語源の単語</span>';
+  html += similar
+    .map(
+      (w) =>
+        `<div class="syn-item"><span class="syn-en">${escapeHtml(w.en)}</span>` +
+        `<span class="syn-ja">${escapeHtml(w.etym || w.ja)}</span></div>`
+    )
+    .join("");
+  return html;
+}
+
+function toggleEtymology(card, wordIndex, btn) {
+  const target = card.querySelector('[data-reveal="etym"]');
+  const show = !target.classList.contains("show");
+  if (show) {
+    const w = WORDS[wordIndex];
+    target.innerHTML = formatEtymHtml(w, findSimilarEtymology(wordIndex));
+  }
+  target.classList.toggle("show", show);
+  btn.classList.toggle("done", show);
+}
+
 // ---- カードの生成 ----
 function createCard(wordIndex, displayNum) {
   const w = WORDS[wordIndex];
@@ -327,12 +542,15 @@ function createCard(wordIndex, displayNum) {
       <span class="word-kana">${escapeHtml(w.kana)}</span>
       <button class="inline-btn" data-read="word">読む</button>
     </div>
+    ${w.etym ? `<div class="card-line etym-line">語源: <span class="word-etym">${escapeHtml(w.etym)}</span></div>` : ""}
     <div class="card-line btn-line">
       <button class="reveal-btn" data-toggle="word">和訳する</button>
       <button class="reveal-btn" data-synonym>類語を検索する</button>
+      <button class="reveal-btn" data-etymology>似た語源の単語</button>
     </div>
     <div class="reveal" data-reveal="word"><span class="label">単語の意味</span>${escapeHtml(w.ja)}</div>
     <div class="reveal reveal-syn" data-reveal="syn"></div>
+    <div class="reveal reveal-etym" data-reveal="etym"></div>
 
     <div class="card-line ex-line">
       <span class="example-en">${highlightWord(w.en, w.ex)}</span>
@@ -367,6 +585,10 @@ function createCard(wordIndex, displayNum) {
   // 類語を検索する
   card.querySelector("[data-synonym]").addEventListener("click", (e) => {
     toggleSynonyms(card, wordIndex, e.currentTarget);
+  });
+  // 似た語源の単語
+  card.querySelector("[data-etymology]").addEventListener("click", (e) => {
+    toggleEtymology(card, wordIndex, e.currentTarget);
   });
   // 覚えた → 入れ替え
   card.querySelector("[data-learned]").addEventListener("click", () => {
@@ -416,13 +638,16 @@ function renumber() {
 }
 
 function updateStats() {
-  const total = WORDS.length;
-  const done = learned.size;
+  const pool = poolWords();
+  const poolKeys = new Set(pool.map((w) => w.en.toLowerCase()));
+  const total = pool.length;
+  const done = [...learned].filter((k) => poolKeys.has(k)).length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   learnedCountEl.textContent = `覚えた: ${done}`;
   remainCountEl.textContent = `残り: ${total - done}`;
   progressPctEl.textContent = `${pct}%`;
   progressFillEl.style.width = `${pct}%`;
+  updateCatCount();
 }
 
 function showEmpty() {
@@ -478,7 +703,7 @@ function highlightWord(word, text) {
 // 全カードの和訳を一括表示/非表示
 function toggleAllReveals(show) {
   cardList.querySelectorAll(".reveal").forEach((el) => {
-    if (el.dataset.reveal === "syn") {
+    if (el.dataset.reveal === "syn" || el.dataset.reveal === "etym") {
       el.classList.remove("show");
       el.innerHTML = "";
       return;
@@ -486,7 +711,7 @@ function toggleAllReveals(show) {
     el.classList.toggle("show", show);
   });
   cardList.querySelectorAll(".reveal-btn").forEach((btn) => {
-    if (btn.hasAttribute("data-synonym")) {
+    if (btn.hasAttribute("data-synonym") || btn.hasAttribute("data-etymology")) {
       btn.classList.remove("done");
       return;
     }
@@ -621,6 +846,7 @@ window.addEventListener("pagehide", stopSpeaking);
 
 if (appVersionEl) appVersionEl.textContent = `v${APP_VERSION}`;
 
+initCategorySelect();
 render();
 
 // ---- 最新版への更新（キャッシュ削除） ----

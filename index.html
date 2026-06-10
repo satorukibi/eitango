@@ -8,7 +8,7 @@
   <title>英単語 - ニュース頻出（中級）</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=15" />
+  <link rel="stylesheet" href="style.css?v=17" />
 </head>
 <body>
   <header class="app-header">
@@ -23,6 +23,11 @@
     </div>
     <div class="progress-bar" aria-hidden="true">
       <div id="progressFill" class="progress-fill"></div>
+    </div>
+    <div class="category-row">
+      <label for="catSelect">属性</label>
+      <select id="catSelect" aria-label="属性で絞り込み"></select>
+      <span id="catCount" class="cat-count"></span>
     </div>
     <div class="header-actions">
       <button id="readWordsBtn" class="btn btn-primary">▶ 単語を全部読む</button>
@@ -47,7 +52,7 @@
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words.js?v=15"></script>
-  <script src="app.js?v=15"></script>
+  <script src="words.js?v=17"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

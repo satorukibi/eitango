@@ -11,7 +11,8 @@
   --green-dark: #15803d;
   --line: #e2e8f0;
   --radius: 16px;
-  --content-width: 450px; /* 従来680pxの約2/3 */
+  --content-width: 100%;
+  --content-padding: 12px;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -19,11 +20,21 @@
 html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", Meiryo, sans-serif;
   -webkit-text-size-adjust: 100%;
+}
+
+/* スマホ縦向き：画面幅いっぱい。タブレット・PC幅だけ中央寄せ */
+@media (min-width: 520px) {
+  :root {
+    --content-width: 450px;
+  }
 }
 
 /* ---------- ヘッダー ---------- */
@@ -33,7 +44,10 @@ html, body {
   z-index: 10;
   background: var(--bg);
   color: #fff;
-  padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  padding: calc(env(safe-area-inset-top) + 12px)
+    max(16px, env(safe-area-inset-right))
+    12px
+    max(16px, env(safe-area-inset-left));
   border-bottom: 1px solid #334155;
 }
 
@@ -89,6 +103,32 @@ html, body {
   background: linear-gradient(90deg, #2563eb, #4ade80);
   border-radius: 999px;
   transition: width 0.25s ease;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.category-row label {
+  font-weight: 700;
+  color: #cbd5e1;
+}
+.category-row select {
+  flex: 1;
+  min-width: 140px;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  min-height: 40px;
+}
+.cat-count {
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 .header-actions {
@@ -190,8 +230,11 @@ html, body {
 /* ---------- カード一覧 ---------- */
 .card-list {
   max-width: var(--content-width);
+  width: 100%;
   margin: 0 auto;
-  padding: 14px 12px calc(env(safe-area-inset-bottom) + 40px);
+  padding: 14px max(var(--content-padding), env(safe-area-inset-right))
+    calc(env(safe-area-inset-bottom) + 40px)
+    max(var(--content-padding), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -234,6 +277,16 @@ html, body {
 .word-line .word-kana {
   font-size: 15px;
   color: var(--muted);
+  font-weight: 600;
+}
+
+.etym-line {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.word-etym {
+  color: #475569;
   font-weight: 600;
 }
 
@@ -326,6 +379,17 @@ html, body {
   color: #1e3a8a;
 }
 
+.reveal-etym {
+  background: #faf5ff;
+  color: #5b21b6;
+}
+
+.etym-self {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .syn-item {
   display: flex;
   flex-wrap: wrap;
@@ -382,8 +446,10 @@ html, body {
 /* ---------- 完了画面 ---------- */
 .empty-state {
   max-width: var(--content-width);
+  width: 100%;
   margin: 40px auto;
-  padding: 30px 20px;
+  padding: 30px max(var(--content-padding), env(safe-area-inset-right))
+    20px max(var(--content-padding), env(safe-area-inset-left));
   text-align: center;
   color: #e2e8f0;
 }
