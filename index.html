@@ -4,11 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="英単語" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>英単語 - ニュース頻出（中級）</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=21" />
+  <link rel="stylesheet" href="style.css?v=22" />
 </head>
 <body>
   <header class="app-header">
@@ -39,6 +43,7 @@
       <button id="learnedListBtn" class="btn btn-ghost">覚えた一覧</button>
       <button id="resetBtn" class="btn btn-ghost">リセット</button>
       <button id="updateBtn" class="btn btn-ghost">🔄 最新版に更新</button>
+      <button id="fullscreenBtn" class="btn btn-ghost" hidden>⛶ 全画面</button>
       <button id="voiceInfoBtn" class="btn btn-ghost">🔧 音声情報</button>
     </div>
     <div id="learnedPanel" class="learned-panel" hidden></div>
@@ -52,7 +57,7 @@
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words.js?v=21"></script>
-  <script src="app.js?v=21"></script>
+  <script src="words.js?v=22"></script>
+  <script src="app.js?v=22"></script>
 </body>
 </html>
