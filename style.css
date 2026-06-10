@@ -12,7 +12,7 @@
   --line: #e2e8f0;
   --radius: 16px;
   --content-width: 100%;
-  --content-padding: 12px;
+  --content-padding: 8px;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -22,19 +22,13 @@ html, body {
   padding: 0;
   width: 100%;
   max-width: 100%;
+  min-height: 100%;
   overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", Meiryo, sans-serif;
   -webkit-text-size-adjust: 100%;
-}
-
-/* スマホ縦向き：画面幅いっぱい。タブレット・PC幅だけ中央寄せ */
-@media (min-width: 520px) {
-  :root {
-    --content-width: 450px;
-  }
 }
 
 /* ---------- ヘッダー ---------- */
@@ -44,10 +38,10 @@ html, body {
   z-index: 10;
   background: var(--bg);
   color: #fff;
-  padding: calc(env(safe-area-inset-top) + 12px)
-    max(16px, env(safe-area-inset-right))
-    12px
-    max(16px, env(safe-area-inset-left));
+  padding: calc(env(safe-area-inset-top) + 10px)
+    max(8px, env(safe-area-inset-right))
+    10px
+    max(8px, env(safe-area-inset-left));
   border-bottom: 1px solid #334155;
 }
 
@@ -280,16 +274,6 @@ html, body {
   font-weight: 600;
 }
 
-.etym-line {
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.5;
-}
-.word-etym {
-  color: #475569;
-  font-weight: 600;
-}
-
 .inline-btn {
   flex: 0 0 auto;
   background: var(--card-soft);
@@ -404,9 +388,18 @@ html, body {
   font-size: 16px;
 }
 
-.syn-ja {
-  font-size: 13px;
+.syn-pos {
+  font-size: 11px;
   color: var(--muted);
+  background: var(--card-soft);
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.syn-ja {
+  font-size: 14px;
+  color: #334155;
+  font-weight: 600;
 }
 
 .syn-none {

@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "18";
+const APP_VERSION = "19";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000;
 const STORAGE_KEY = "eitango.learned.v1";
@@ -484,8 +484,8 @@ function toggleSynonyms(card, wordIndex, btn) {
   btn.classList.toggle("done", show);
 }
 
-// ---- 似た語源の単語 ----
-function findSimilarEtymology(wordIndex, limit = 5) {
+// ---- 語源検索 ----
+function findSimilarEtymology(wordIndex, limit = 8) {
   const target = WORDS[wordIndex];
   if (!target.etymKey) return [];
   const hits = [];
@@ -493,6 +493,7 @@ function findSimilarEtymology(wordIndex, limit = 5) {
     if (i === wordIndex) continue;
     if (WORDS[i].etymKey === target.etymKey) hits.push(WORDS[i]);
   }
+  hits.sort((a, b) => a.en.localeCompare(b.en));
   return hits.slice(0, limit);
 }
 
@@ -500,17 +501,21 @@ function formatEtymHtml(target, similar) {
   let html = "";
   if (target.etym) {
     html += `<p class="etym-self">語源: ${escapeHtml(target.etym)}</p>`;
-  }
-  if (similar.length === 0) {
-    html += '<p class="syn-none">同じ語源の登録語は見つかりませんでした。</p>';
+  } else {
+    html += '<p class="syn-none">この単語の語源は判定できませんでした。</p>';
     return html;
   }
-  html += '<span class="label">似た語源の単語</span>';
+  if (similar.length === 0) {
+    html += '<p class="syn-none">同じ語源の他の登録語はまだありません。</p>';
+    return html;
+  }
+  html += '<span class="label">同じ語源の単語</span>';
   html += similar
     .map(
       (w) =>
         `<div class="syn-item"><span class="syn-en">${escapeHtml(w.en)}</span>` +
-        `<span class="syn-ja">${escapeHtml(w.etym || w.ja)}</span></div>`
+        `<span class="syn-pos">${escapeHtml(w.pos)}</span>` +
+        `<span class="syn-ja">${escapeHtml(w.ja)}</span></div>`
     )
     .join("");
   return html;
@@ -542,11 +547,10 @@ function createCard(wordIndex, displayNum) {
       <span class="word-kana">${escapeHtml(w.kana)}</span>
       <button class="inline-btn" data-read="word">読む</button>
     </div>
-    ${w.etym ? `<div class="card-line etym-line">語源: <span class="word-etym">${escapeHtml(w.etym)}</span></div>` : ""}
     <div class="card-line btn-line">
       <button class="reveal-btn" data-toggle="word">和訳する</button>
       <button class="reveal-btn" data-synonym>類語を検索する</button>
-      <button class="reveal-btn" data-etymology>似た語源の単語</button>
+      <button class="reveal-btn" data-etymology>語源を検索する</button>
     </div>
     <div class="reveal" data-reveal="word"><span class="label">単語の意味</span>${escapeHtml(w.ja)}</div>
     <div class="reveal reveal-syn" data-reveal="syn"></div>
@@ -586,7 +590,7 @@ function createCard(wordIndex, displayNum) {
   card.querySelector("[data-synonym]").addEventListener("click", (e) => {
     toggleSynonyms(card, wordIndex, e.currentTarget);
   });
-  // 似た語源の単語
+  // 語源を検索する
   card.querySelector("[data-etymology]").addEventListener("click", (e) => {
     toggleEtymology(card, wordIndex, e.currentTarget);
   });
