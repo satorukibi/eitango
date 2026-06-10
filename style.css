@@ -11,7 +11,7 @@
   --green-dark: #15803d;
   --line: #e2e8f0;
   --radius: 16px;
-  --box-max: 450px;
+  --content-width: 450px;
   --content-padding: 12px;
 }
 
@@ -47,7 +47,7 @@ html, body {
 }
 
 .app-header > * {
-  max-width: var(--box-max);
+  max-width: var(--content-width);
   margin-left: auto;
   margin-right: auto;
   width: 100%;
@@ -224,6 +224,7 @@ html, body {
 
 /* ---------- カード一覧 ---------- */
 .card-list {
+  max-width: var(--content-width);
   width: 100%;
   margin: 0 auto;
   padding: 14px max(var(--content-padding), env(safe-area-inset-right))
@@ -231,13 +232,10 @@ html, body {
     max(var(--content-padding), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 12px;
 }
 
 .word-card {
-  width: min(100%, var(--box-max));
-  max-width: var(--box-max);
   background: var(--card);
   border-radius: var(--radius);
   padding: 14px 14px 16px;
@@ -441,8 +439,8 @@ html, body {
 
 /* ---------- 完了画面 ---------- */
 .empty-state {
-  max-width: var(--box-max);
-  width: min(100%, var(--box-max));
+  max-width: var(--content-width);
+  width: 100%;
   margin: 40px auto;
   padding: 30px max(var(--content-padding), env(safe-area-inset-right))
     20px max(var(--content-padding), env(safe-area-inset-left));
