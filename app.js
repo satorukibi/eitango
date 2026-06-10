@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "24";
+const APP_VERSION = "25";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000;
 const STORAGE_KEY = "eitango.learned.v1";
@@ -172,7 +172,6 @@ const progressPctEl = document.getElementById("progressPct");
 const progressFillEl = document.getElementById("progressFill");
 const appVersionEl = document.getElementById("appVersion");
 const updateBtn = document.getElementById("updateBtn");
-const fullscreenBtn = document.getElementById("fullscreenBtn");
 const catSelect = document.getElementById("catSelect");
 const catCountEl = document.getElementById("catCount");
 
@@ -848,47 +847,6 @@ voiceInfoBtn.addEventListener("click", () => {
 
 // 画面を離れる時に読み上げを止める
 window.addEventListener("pagehide", stopSpeaking);
-
-// ---- 全画面表示 ----
-function isStandaloneApp() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: fullscreen)").matches ||
-    window.navigator.standalone === true
-  );
-}
-
-function isBrowserFullscreen() {
-  return !!(document.fullscreenElement || document.webkitFullscreenElement);
-}
-
-function isFullscreenMode() {
-  return isStandaloneApp() || isBrowserFullscreen();
-}
-
-async function enterFullscreen() {
-  const el = document.documentElement;
-  try {
-    if (el.requestFullscreen) await el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-  } catch (e) {}
-}
-
-function updateFullscreenBtn() {
-  if (!fullscreenBtn) return;
-  fullscreenBtn.hidden = isFullscreenMode();
-}
-
-if (fullscreenBtn) {
-  fullscreenBtn.hidden = isFullscreenMode();
-  fullscreenBtn.addEventListener("click", () => {
-    enterFullscreen();
-  });
-  document.addEventListener("fullscreenchange", updateFullscreenBtn);
-  document.addEventListener("webkitfullscreenchange", updateFullscreenBtn);
-  window.matchMedia("(display-mode: standalone)").addEventListener("change", updateFullscreenBtn);
-  window.matchMedia("(display-mode: fullscreen)").addEventListener("change", updateFullscreenBtn);
-}
 
 if (appVersionEl) appVersionEl.textContent = `v${APP_VERSION}`;
 

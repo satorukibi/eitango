@@ -4,7 +4,6 @@
   "description": "AI・戦争などニュース頻出の中級英単語を学べるアプリ",
   "start_url": "./index.html",
   "display": "standalone",
-  "display_override": ["fullscreen", "standalone"],
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
