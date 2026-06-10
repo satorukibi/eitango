@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "23";
+const APP_VERSION = "24";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000;
 const STORAGE_KEY = "eitango.learned.v1";

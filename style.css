@@ -11,23 +11,8 @@
   --green-dark: #15803d;
   --line: #e2e8f0;
   --radius: 16px;
-  --content-width: 100%;
+  --box-max: 450px;
   --content-padding: 12px;
-}
-
-/* ホーム画面から起動・全画面表示：常に画面幅いっぱい */
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  :root {
-    --content-width: 100%;
-    --content-padding: 12px;
-  }
-}
-
-/* PC（マウス操作の大画面）だけ450px中央寄せ */
-@media (min-width: 900px) and (hover: hover) {
-  :root {
-    --content-width: 450px;
-  }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -66,7 +51,7 @@ html, body {
 }
 
 .app-header > * {
-  max-width: var(--content-width);
+  max-width: var(--box-max);
   margin-left: auto;
   margin-right: auto;
   width: 100%;
@@ -243,7 +228,6 @@ html, body {
 
 /* ---------- カード一覧 ---------- */
 .card-list {
-  max-width: var(--content-width);
   width: 100%;
   margin: 0 auto;
   padding: 14px max(var(--content-padding), env(safe-area-inset-right))
@@ -251,10 +235,13 @@ html, body {
     max(var(--content-padding), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
 }
 
 .word-card {
+  width: min(100%, var(--box-max));
+  max-width: var(--box-max);
   background: var(--card);
   border-radius: var(--radius);
   padding: 14px 14px 16px;
@@ -283,13 +270,13 @@ html, body {
 .card-line:first-child { margin-top: 0; }
 
 .word-line .word-en {
-  font-size: clamp(26px, 6.5vw, 32px);
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.01em;
 }
 
 .word-line .word-kana {
-  font-size: clamp(16px, 4vw, 18px);
+  font-size: 15px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -317,8 +304,8 @@ html, body {
 }
 
 .ex-line .example-en {
-  font-size: clamp(16px, 4.2vw, 18px);
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .btn-line {
@@ -458,8 +445,8 @@ html, body {
 
 /* ---------- 完了画面 ---------- */
 .empty-state {
-  max-width: var(--content-width);
-  width: 100%;
+  max-width: var(--box-max);
+  width: min(100%, var(--box-max));
   margin: 40px auto;
   padding: 30px max(var(--content-padding), env(safe-area-inset-right))
     20px max(var(--content-padding), env(safe-area-inset-left));
