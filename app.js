@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "17";
+const APP_VERSION = "18";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000;
 const STORAGE_KEY = "eitango.learned.v1";
@@ -852,8 +852,33 @@ render();
 // ---- 最新版への更新（キャッシュ削除） ----
 let swRefreshing = false;
 
+async function fetchServerVersion() {
+  const res = await fetch(`app.js?check=${Date.now()}`, { cache: "no-store" });
+  const text = await res.text();
+  const m = text.match(/APP_VERSION\s*=\s*"(\d+)"/);
+  return m ? m[1] : APP_VERSION;
+}
+
+function indexHtmlUrl(serverVer) {
+  const u = new URL(location.href);
+  const base = u.pathname.replace(/\/?index\.html$/i, "").replace(/\/?$/, "/");
+  u.pathname = `${base}index.html`;
+  u.search = `_v=${serverVer}&_t=${Date.now()}`;
+  u.hash = "";
+  return u.href;
+}
+
 async function forceUpdate() {
+  if (updateBtn) {
+    updateBtn.disabled = true;
+    updateBtn.textContent = "更新中...";
+  }
+  let serverVer = APP_VERSION;
   try {
+    serverVer = await fetchServerVersion();
+  } catch (e) {}
+  try {
+    sessionStorage.setItem("eitango.updateTarget", serverVer);
     if ("serviceWorker" in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.unregister()));
@@ -863,8 +888,7 @@ async function forceUpdate() {
       await Promise.all(keys.map((k) => caches.delete(k)));
     }
   } catch (e) {}
-  const base = location.href.split("?")[0];
-  location.replace(`${base}?v=${APP_VERSION}&t=${Date.now()}`);
+  location.replace(indexHtmlUrl(serverVer));
 }
 
 function showUpdateBanner(newVer) {
@@ -882,12 +906,28 @@ function showUpdateBanner(newVer) {
 
 async function checkForUpdate() {
   try {
-    const res = await fetch(`app.js?check=${Date.now()}`, { cache: "no-store" });
-    const text = await res.text();
-    const m = text.match(/APP_VERSION\s*=\s*"(\d+)"/);
-    if (m && m[1] !== APP_VERSION) showUpdateBanner(m[1]);
+    const serverVer = await fetchServerVersion();
+    if (serverVer !== APP_VERSION) {
+      showUpdateBanner(serverVer);
+      if (updateBtn) updateBtn.textContent = `🔄 更新 (v${serverVer}あり)`;
+    }
   } catch (e) {}
 }
+
+(function showUpdateResult() {
+  const target = sessionStorage.getItem("eitango.updateTarget");
+  if (!target) return;
+  sessionStorage.removeItem("eitango.updateTarget");
+  if (target === APP_VERSION) {
+    alert(`最新版 v${APP_VERSION} に更新しました。`);
+  } else {
+    alert(
+      `まだ古い版 (v${APP_VERSION}) です。\n` +
+        `サーバーは v${target} です。\n` +
+        `もう一度「最新版に更新」を試すか、ブラウザの設定からこのサイトのデータを削除してください。`
+    );
+  }
+})();
 
 if (updateBtn) {
   updateBtn.addEventListener("click", () => {
@@ -910,7 +950,9 @@ if ("serviceWorker" in navigator) {
       .register(`sw.js?v=${APP_VERSION}`)
       .then((reg) => {
         reg.update();
-        if (reg.waiting) forceUpdate();
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
       })
       .catch(() => {});
     setTimeout(checkForUpdate, 3000);

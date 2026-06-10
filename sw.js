@@ -1,5 +1,5 @@
 // オフライン対応 Service Worker（オンライン時は常に最新版を優先）
-const CACHE = "eitango-v17";
+const CACHE = "eitango-v18";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,6 +23,10 @@ self.addEventListener("activate", (e) => {
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 // アプリ本体: ネット優先（no-store）。オフライン時のみキャッシュ。
