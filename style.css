@@ -12,7 +12,14 @@
   --line: #e2e8f0;
   --radius: 16px;
   --content-width: 100%;
-  --content-padding: 8px;
+  --content-padding: 12px;
+}
+
+/* スマホ縦向き：画面幅いっぱい。520px以上は読みやすい450px幅で中央寄せ */
+@media (min-width: 520px) {
+  :root {
+    --content-width: 450px;
+  }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,10 +45,10 @@ html, body {
   z-index: 10;
   background: var(--bg);
   color: #fff;
-  padding: calc(env(safe-area-inset-top) + 10px)
-    max(8px, env(safe-area-inset-right))
-    10px
-    max(8px, env(safe-area-inset-left));
+  padding: calc(env(safe-area-inset-top) + 12px)
+    max(16px, env(safe-area-inset-right))
+    12px
+    max(16px, env(safe-area-inset-left));
   border-bottom: 1px solid #334155;
 }
 

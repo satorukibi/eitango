@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "19";
+const APP_VERSION = "21";
 const CARDS_PER_PAGE = 12;
 const WORD_READ_PAUSE_MS = 1000;
 const STORAGE_KEY = "eitango.learned.v1";
@@ -856,11 +856,29 @@ render();
 // ---- 最新版への更新（キャッシュ削除） ----
 let swRefreshing = false;
 
+async function fetchNoStore(path) {
+  const bust = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  const url = path.includes("?") ? `${path}&_=${bust}` : `${path}?_=${bust}`;
+  return fetch(url, {
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache", Pragma: "no-cache" }
+  });
+}
+
 async function fetchServerVersion() {
-  const res = await fetch(`app.js?check=${Date.now()}`, { cache: "no-store" });
-  const text = await res.text();
-  const m = text.match(/APP_VERSION\s*=\s*"(\d+)"/);
-  return m ? m[1] : APP_VERSION;
+  try {
+    const htmlRes = await fetchNoStore("index.html");
+    const html = await htmlRes.text();
+    const mHtml = html.match(/app\.js\?v=(\d+)/);
+    if (mHtml) return mHtml[1];
+  } catch (e) {}
+  try {
+    const jsRes = await fetchNoStore("app.js");
+    const text = await jsRes.text();
+    const m = text.match(/APP_VERSION\s*=\s*"(\d+)"/);
+    if (m) return m[1];
+  } catch (e) {}
+  return APP_VERSION;
 }
 
 function indexHtmlUrl(serverVer) {
@@ -923,14 +941,22 @@ async function checkForUpdate() {
   if (!target) return;
   sessionStorage.removeItem("eitango.updateTarget");
   if (target === APP_VERSION) {
-    alert(`最新版 v${APP_VERSION} に更新しました。`);
-  } else {
-    alert(
-      `まだ古い版 (v${APP_VERSION}) です。\n` +
-        `サーバーは v${target} です。\n` +
-        `もう一度「最新版に更新」を試すか、ブラウザの設定からこのサイトのデータを削除してください。`
-    );
+    sessionStorage.removeItem("eitango.updateRetries");
+    return;
   }
+  const retries = Number(sessionStorage.getItem("eitango.updateRetries") || 0);
+  if (retries < 2) {
+    sessionStorage.setItem("eitango.updateRetries", String(retries + 1));
+    setTimeout(forceUpdate, 800);
+    return;
+  }
+  sessionStorage.removeItem("eitango.updateRetries");
+  alert(
+    `更新が完了しませんでした。\n` +
+      `現在: v${APP_VERSION}　最新: v${target}\n\n` +
+      `もう一度「最新版に更新」を押すか、\n` +
+      `ブラウザ設定 → サイトの設定 → github.io のデータを削除してください。`
+  );
 })();
 
 if (updateBtn) {
