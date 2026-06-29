@@ -6,9 +6,11 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "27";
+const APP_VERSION = "31";
+const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
-const WORD_READ_PAUSE_MS = 1000;
+const WORD_READ_PAUSE_MS = 1000; // 英語：単語→例文の間
+const READ_PAUSE_MS = 2000;      // 和訳・例文など：次へ進む前の休み
 const STORAGE_KEY = "eitango.learned.v1";
 const STORAGE_KEY_VISIBLE = "eitango.visible.v1";
 const STORAGE_KEY_CATEGORY = "eitango.category.v1";
@@ -159,7 +161,10 @@ const emptyState = document.getElementById("emptyState");
 const learnedCountEl = document.getElementById("learnedCount");
 const remainCountEl = document.getElementById("remainCount");
 const readWordsBtn = document.getElementById("readWordsBtn");
+const readWordExBtn = document.getElementById("readWordExBtn");
 const readAllBtn = document.getElementById("readAllBtn");
+const readJaBtn = document.getElementById("readJaBtn");
+const readExJaBtn = document.getElementById("readExJaBtn");
 const stopBtn = document.getElementById("stopBtn");
 const showAllBtn = document.getElementById("showAllBtn");
 const hideAllBtn = document.getElementById("hideAllBtn");
@@ -297,25 +302,39 @@ const synth = window.speechSynthesis;
 // 端末の音声一覧から「英語の声」を選ぶ。
 // （日本語の声で英語を読むとローマ字読みになるため、英語ボイスを明示する）
 let enVoice = null;
+let jaVoice = null;
+
 function pickEnglishVoice() {
   if (!synth) return;
   const voices = synth.getVoices();
   if (!voices || voices.length === 0) return;
   enVoice =
-    // en-US を最優先
     voices.find((v) => /^en[-_]US$/i.test(v.lang)) ||
-    // 次に en-GB
     voices.find((v) => /^en[-_]GB$/i.test(v.lang)) ||
-    // それ以外の英語ボイス全般
     voices.find((v) => /^en([-_]|$)/i.test(v.lang)) ||
-    // 名前に English を含むもの（保険）
     voices.find((v) => /english/i.test(v.name)) ||
     null;
 }
-pickEnglishVoice();
+
+function pickJapaneseVoice() {
+  if (!synth) return;
+  const voices = synth.getVoices();
+  if (!voices || voices.length === 0) return;
+  jaVoice =
+    voices.find((v) => /^ja[-_]JP$/i.test(v.lang)) ||
+    voices.find((v) => /^ja([-_]|$)/i.test(v.lang)) ||
+    voices.find((v) => /japanese|日本/i.test(v.name)) ||
+    null;
+}
+
+function pickVoices() {
+  pickEnglishVoice();
+  pickJapaneseVoice();
+}
+
+pickVoices();
 if (synth) {
-  // 音声リストは非同期で読み込まれるため、更新時に選び直す
-  synth.onvoiceschanged = pickEnglishVoice;
+  synth.onvoiceschanged = pickVoices;
 }
 
 // 英語読み上げ用のUtteranceを作る
@@ -324,6 +343,15 @@ function makeEnUtterance(text) {
   if (!enVoice) pickEnglishVoice();
   if (enVoice) u.voice = enVoice;
   u.lang = (enVoice && enVoice.lang) || "en-US";
+  u.rate = 0.95;
+  return u;
+}
+
+function makeJaUtterance(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  if (!jaVoice) pickJapaneseVoice();
+  if (jaVoice) u.voice = jaVoice;
+  u.lang = (jaVoice && jaVoice.lang) || "ja-JP";
   u.rate = 0.95;
   return u;
 }
@@ -357,7 +385,7 @@ function clearSpeakPause() {
 }
 
 // テキスト列を順番に読み上げ（カード連動）
-function speakSequence(texts, cards, pauseMs = 0) {
+function speakSequence(texts, cards, pauseMs = 0, makeUtterance = makeEnUtterance) {
   if (!synth) return;
   clearSpeakPause();
   synth.cancel();
@@ -370,7 +398,7 @@ function speakSequence(texts, cards, pauseMs = 0) {
       return;
     }
     setSpeakingCard(cards[idx] || null);
-    const u = makeEnUtterance(texts[idx]);
+    const u = makeUtterance(texts[idx]);
     const advance = () => {
       idx++;
       if (idx >= texts.length) {
@@ -394,8 +422,12 @@ function speakSequence(texts, cards, pauseMs = 0) {
   next();
 }
 
+function visibleCards() {
+  return [...cardList.querySelectorAll(".word-card")];
+}
+
 function speakAllWords() {
-  const cards = [...cardList.querySelectorAll(".word-card")];
+  const cards = visibleCards();
   speakSequence(
     cards.map((c) => WORDS[Number(c.dataset.index)].en),
     cards,
@@ -403,12 +435,48 @@ function speakAllWords() {
   );
 }
 
-// 例文を全部読む（順番に）
+// 単語→例文を交互に全部読む
+function speakAllWordsThenExamples() {
+  const cards = visibleCards();
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ex);
+    highlightCards.push(c, c);
+  }
+  speakSequence(texts, highlightCards, WORD_READ_PAUSE_MS);
+}
+
+// 例文を全部読む
 function speakAll() {
-  const cards = [...cardList.querySelectorAll(".word-card")];
+  const cards = visibleCards();
   speakSequence(
     cards.map((c) => WORDS[Number(c.dataset.index)].ex),
-    cards
+    cards,
+    READ_PAUSE_MS
+  );
+}
+
+// 単語の和訳を全部読む（日本語）
+function speakAllJa() {
+  const cards = visibleCards();
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].ja),
+    cards,
+    READ_PAUSE_MS,
+    makeJaUtterance
+  );
+}
+
+// 例文の和訳を全部読む（日本語）
+function speakAllExJa() {
+  const cards = visibleCards();
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].exJa),
+    cards,
+    READ_PAUSE_MS,
+    makeJaUtterance
   );
 }
 
@@ -783,6 +851,9 @@ function renderLearnedPanel() {
 // ---- イベント ----
 readWordsBtn.addEventListener("click", speakAllWords);
 readAllBtn.addEventListener("click", speakAll);
+readWordExBtn.addEventListener("click", speakAllWordsThenExamples);
+readJaBtn.addEventListener("click", speakAllJa);
+readExJaBtn.addEventListener("click", speakAllExJa);
 stopBtn.addEventListener("click", stopSpeaking);
 showAllBtn.addEventListener("click", () => toggleAllReveals(true));
 hideAllBtn.addEventListener("click", () => toggleAllReveals(false));
@@ -811,9 +882,10 @@ const voiceInfoBtn = document.getElementById("voiceInfoBtn");
 const voicePanel = document.getElementById("voicePanel");
 
 function renderVoicePanel() {
-  pickEnglishVoice();
+  pickVoices();
   const voices = synth ? synth.getVoices() : [];
   const enVoices = voices.filter((v) => /^en([-_]|$)/i.test(v.lang));
+  const jaVoices = voices.filter((v) => /^ja([-_]|$)/i.test(v.lang));
 
   let html = "";
   if (!synth) {
@@ -822,9 +894,14 @@ function renderVoicePanel() {
     html = '<span class="ng">音声がまだ読み込まれていません。少し待って再度押してください。</span>';
   } else {
     if (enVoice) {
-      html += `<span class="ok">✓ 使用中の英語ボイス: ${escapeHtml(enVoice.name)} (${escapeHtml(enVoice.lang)})</span>\n\n`;
+      html += `<span class="ok">✓ 英語: ${escapeHtml(enVoice.name)} (${escapeHtml(enVoice.lang)})</span>\n`;
     } else {
-      html += '<span class="ng">✗ 英語のボイスが見つかりません。日本語ボイスで読むためローマ字読みになります。\nWindowsの「設定 → 時刻と言語 → 言語と地域 → 英語を追加」で英語音声を入れてください。</span>\n\n';
+      html += '<span class="ng">✗ 英語ボイスが見つかりません。</span>\n';
+    }
+    if (jaVoice) {
+      html += `<span class="ok">✓ 日本語: ${escapeHtml(jaVoice.name)} (${escapeHtml(jaVoice.lang)})</span>\n\n`;
+    } else {
+      html += '<span class="ng">✗ 日本語ボイスが見つかりません（和訳読み上げが不自然になる場合があります）。</span>\n\n';
     }
     html += `英語ボイス: ${enVoices.length}個 / 全${voices.length}個\n`;
     html += "----- 端末の音声一覧 -----\n";
@@ -890,6 +967,35 @@ function indexHtmlUrl(serverVer) {
   return u.href;
 }
 
+function isStandaloneApp() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    navigator.standalone === true
+  );
+}
+
+function markVersionInstalled() {
+  try {
+    localStorage.setItem(INSTALLED_VER_KEY, APP_VERSION);
+  } catch (e) {}
+}
+
+async function ensureLatestVersion(silent = false) {
+  let serverVer = APP_VERSION;
+  try {
+    serverVer = await fetchServerVersion();
+  } catch (e) {
+    if (!navigator.onLine) return;
+  }
+  if (serverVer === APP_VERSION) {
+    markVersionInstalled();
+    return;
+  }
+  if (!silent && !isStandaloneApp()) return;
+  await forceUpdate();
+}
+
 async function forceUpdate() {
   if (updateBtn) {
     updateBtn.disabled = true;
@@ -932,6 +1038,11 @@ async function checkForUpdate() {
     if (serverVer !== APP_VERSION) {
       showUpdateBanner(serverVer);
       if (updateBtn) updateBtn.textContent = `🔄 更新 (v${serverVer}あり)`;
+      if (isStandaloneApp() && navigator.onLine) {
+        await ensureLatestVersion(true);
+      }
+    } else {
+      markVersionInstalled();
     }
   } catch (e) {}
 }
@@ -942,6 +1053,7 @@ async function checkForUpdate() {
   sessionStorage.removeItem("eitango.updateTarget");
   if (target === APP_VERSION) {
     sessionStorage.removeItem("eitango.updateRetries");
+    markVersionInstalled();
     return;
   }
   const retries = Number(sessionStorage.getItem("eitango.updateRetries") || 0);
@@ -955,7 +1067,7 @@ async function checkForUpdate() {
     `更新が完了しませんでした。\n` +
       `現在: v${APP_VERSION}　最新: v${target}\n\n` +
       `もう一度「最新版に更新」を押すか、\n` +
-      `ブラウザ設定 → サイトの設定 → github.io のデータを削除してください。`
+      `スマホのブラウザで http://(PCのIP):8000/?hardreset=1 を開いてください。`
   );
 })();
 
@@ -989,6 +1101,15 @@ if ("serviceWorker" in navigator) {
   });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") checkForUpdate();
+    if (document.visibilityState === "visible") {
+      checkForUpdate();
+      if (isStandaloneApp()) ensureLatestVersion(true);
+    }
   });
+
+  if (isStandaloneApp()) {
+    setTimeout(() => ensureLatestVersion(true), 1500);
+  } else {
+    markVersionInstalled();
+  }
 }

@@ -133,6 +133,14 @@ html, body {
   flex-wrap: wrap;
 }
 
+.header-actions-read {
+  margin-top: 8px;
+}
+
+.header-actions-read:first-of-type {
+  margin-top: 12px;
+}
+
 /* ---------- ボタン ---------- */
 .btn {
   border: none;

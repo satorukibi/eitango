@@ -1,11 +1,12 @@
 // オフライン対応 Service Worker（オンライン時は常に最新版を優先）
-const CACHE = "eitango-v27";
+const CACHE = "eitango-v31";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
   "./words.js",
+  "./words_extra.js",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
@@ -29,16 +30,24 @@ self.addEventListener("message", (e) => {
   if (e.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-// アプリ本体: ネット優先（no-store）。オフライン時のみキャッシュ。
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+
+  // ホーム画面起動（ページ遷移）はオンライン時ネットのみ → 古いHTMLを返さない
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request, { cache: "no-store" }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
   const path = new URL(e.request.url).pathname;
   const isAppFile = APP_FILES.test(path);
 
   e.respondWith(
     fetch(e.request, isAppFile ? { cache: "no-store" } : undefined)
       .then((res) => {
-        if (res.ok) {
+        if (res.ok && isAppFile) {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
         }
