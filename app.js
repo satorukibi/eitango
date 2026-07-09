@@ -6,11 +6,14 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "31";
+const APP_VERSION = "32";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
-const WORD_READ_PAUSE_MS = 1000; // 英語：単語→例文の間
-const READ_PAUSE_MS = 2000;      // 和訳・例文など：次へ進む前の休み
+const WORD_TO_EXAMPLE_PAUSE_MS = 1000; // 英語：単語→例文の間
+const WORD_READ_PAUSE_MS = 3000;       // 単語を読む：単語→単語の間（2秒→3秒）
+const READ_PAUSE_MS = 2000;            // 和訳・例文など：次へ進む前の休み
+const RANDOM_READ_PAUSE_MS = 3000;     // ランダム読み上げ：単語同士・和訳同士の間
+const WORD_JA_PAUSE_MS = 3000;         // 単語→和訳の順で読む：間の休み
 const STORAGE_KEY = "eitango.learned.v1";
 const STORAGE_KEY_VISIBLE = "eitango.visible.v1";
 const STORAGE_KEY_CATEGORY = "eitango.category.v1";
@@ -21,6 +24,7 @@ const WORD_CATEGORIES = [
   "ニュース",
   "戦争",
   "生活",
+  "日常会話",
   "学校",
   "家庭",
   "映画",
@@ -161,9 +165,12 @@ const emptyState = document.getElementById("emptyState");
 const learnedCountEl = document.getElementById("learnedCount");
 const remainCountEl = document.getElementById("remainCount");
 const readWordsBtn = document.getElementById("readWordsBtn");
+const readWordsRandomBtn = document.getElementById("readWordsRandomBtn");
 const readWordExBtn = document.getElementById("readWordExBtn");
+const readWordJaBtn = document.getElementById("readWordJaBtn");
 const readAllBtn = document.getElementById("readAllBtn");
 const readJaBtn = document.getElementById("readJaBtn");
+const readJaRandomBtn = document.getElementById("readJaRandomBtn");
 const readExJaBtn = document.getElementById("readExJaBtn");
 const stopBtn = document.getElementById("stopBtn");
 const showAllBtn = document.getElementById("showAllBtn");
@@ -398,7 +405,7 @@ function speakSequence(texts, cards, pauseMs = 0, makeUtterance = makeEnUtteranc
       return;
     }
     setSpeakingCard(cards[idx] || null);
-    const u = makeUtterance(texts[idx]);
+    const u = makeUtterance(texts[idx], idx);
     const advance = () => {
       idx++;
       if (idx >= texts.length) {
@@ -445,7 +452,35 @@ function speakAllWordsThenExamples() {
     texts.push(w.en, w.ex);
     highlightCards.push(c, c);
   }
-  speakSequence(texts, highlightCards, WORD_READ_PAUSE_MS);
+  speakSequence(texts, highlightCards, WORD_TO_EXAMPLE_PAUSE_MS);
+}
+
+// 単語をランダムな順番で全部読む（単語同士の間は3秒）
+function speakAllWordsRandom() {
+  const cards = shuffle([...visibleCards()]);
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].en),
+    cards,
+    RANDOM_READ_PAUSE_MS
+  );
+}
+
+// 単語→和訳の順で読む（間は3秒）
+function speakWordThenJa() {
+  const cards = visibleCards();
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ja);
+    highlightCards.push(c, c);
+  }
+  speakSequence(
+    texts,
+    highlightCards,
+    WORD_JA_PAUSE_MS,
+    (text, idx) => (idx % 2 === 0 ? makeEnUtterance(text) : makeJaUtterance(text))
+  );
 }
 
 // 例文を全部読む
@@ -465,6 +500,17 @@ function speakAllJa() {
     cards.map((c) => WORDS[Number(c.dataset.index)].ja),
     cards,
     READ_PAUSE_MS,
+    makeJaUtterance
+  );
+}
+
+// 単語の和訳をランダムな順番で全部読む（間は3秒）
+function speakAllJaRandom() {
+  const cards = shuffle([...visibleCards()]);
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].ja),
+    cards,
+    RANDOM_READ_PAUSE_MS,
     makeJaUtterance
   );
 }
@@ -850,9 +896,12 @@ function renderLearnedPanel() {
 
 // ---- イベント ----
 readWordsBtn.addEventListener("click", speakAllWords);
+readWordsRandomBtn.addEventListener("click", speakAllWordsRandom);
 readAllBtn.addEventListener("click", speakAll);
 readWordExBtn.addEventListener("click", speakAllWordsThenExamples);
+readWordJaBtn.addEventListener("click", speakWordThenJa);
 readJaBtn.addEventListener("click", speakAllJa);
+readJaRandomBtn.addEventListener("click", speakAllJaRandom);
 readExJaBtn.addEventListener("click", speakAllExJa);
 stopBtn.addEventListener("click", stopSpeaking);
 showAllBtn.addEventListener("click", () => toggleAllReveals(true));

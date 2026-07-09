@@ -429,4 +429,5 @@ const DEFAULT_WORDS = [
   { en: "widespread", pos: "形容詞", kana: "ワイドスプレッド", ja: "広範囲の", ex: "Widespread protests erupted nationwide.", exJa: "全国で広範囲の抗議が勃発した。" },
   { en: "ongoing", pos: "形容詞", kana: "オンゴーイング", ja: "進行中の", ex: "An ongoing investigation slowed the deal.", exJa: "進行中の捜査が取引を遅らせた。" },
   { en: "substantial", pos: "形容詞", kana: "サブスタンシャル", ja: "かなりの・実質的な", ex: "The deal brought substantial economic benefits.", exJa: "その取引はかなりの経済的利益をもたらした。" }
-].concat(typeof WORDS_EXTRA !== "undefined" ? WORDS_EXTRA : []);
+].concat(typeof WORDS_EXTRA !== "undefined" ? WORDS_EXTRA : [])
+ .concat(typeof WORDS_EXTRA2 !== "undefined" ? WORDS_EXTRA2 : []);
