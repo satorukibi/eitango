@@ -47,6 +47,7 @@ const ETYM_ROOTS = [
   { key: "tract", label: "ラテン語 trahere（引く）" },
   { key: "port", label: "ラテン語 portare（運ぶ）" },
   { key: "dict", label: "ラテン語 dicere（言う）" },
+  { key: "juris", label: "ラテン語 jus/juris（法）" },
   { key: "ject", label: "ラテン語 jacere（投げる）" },
   { key: "mit", label: "ラテン語 mittere（送る）" },
   { key: "form", label: "ラテン語 forma（形）" },
@@ -591,8 +592,16 @@ function toggleSynonyms(card, wordIndex, btn) {
   const target = card.querySelector('[data-reveal="syn"]');
   const show = !target.classList.contains("show");
   if (show) {
-    target.innerHTML =
-      '<span class="label">類語（登録語より）</span>' + formatSynonymHtml(findSimilarWords(wordIndex));
+    const w = WORDS[wordIndex];
+    if (w.syn) {
+      // 登録済みの類義語（ニュアンス付き）を優先表示
+      target.innerHTML =
+        '<span class="label">類語</span><div class="syn-item">' + escapeHtml(w.syn) + '</div>';
+    } else {
+      // 未登録の語は従来どおり登録語から自動検索
+      target.innerHTML =
+        '<span class="label">類語（登録語より）</span>' + formatSynonymHtml(findSimilarWords(wordIndex));
+    }
   }
   target.classList.toggle("show", show);
   btn.classList.toggle("done", show);

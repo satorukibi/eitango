@@ -428,6 +428,116 @@ const DEFAULT_WORDS = [
   { en: "inevitable", pos: "形容詞", kana: "イネヴィタブル", ja: "避けられない", ex: "Some job losses seemed inevitable.", exJa: "一部の失業は避けられないように見えた。" },
   { en: "widespread", pos: "形容詞", kana: "ワイドスプレッド", ja: "広範囲の", ex: "Widespread protests erupted nationwide.", exJa: "全国で広範囲の抗議が勃発した。" },
   { en: "ongoing", pos: "形容詞", kana: "オンゴーイング", ja: "進行中の", ex: "An ongoing investigation slowed the deal.", exJa: "進行中の捜査が取引を遅らせた。" },
-  { en: "substantial", pos: "形容詞", kana: "サブスタンシャル", ja: "かなりの・実質的な", ex: "The deal brought substantial economic benefits.", exJa: "その取引はかなりの経済的利益をもたらした。" }
+  { en: "substantial", pos: "形容詞", kana: "サブスタンシャル", ja: "かなりの・実質的な", ex: "The deal brought substantial economic benefits.", exJa: "その取引はかなりの経済的利益をもたらした。" },
+
+//  Sample kaiwa20 · JS
+// ============================================================
+// サンプル②: 日常会話チャンク20個（新カテゴリ「日常会話」用）
+// 方針:
+//   en   : 単語ではなく句動詞・チャンク単位で登録
+//   ex   : 会話の一往復（A/B形式）で「使われる場面ごと」覚える
+//   etym : 語源の代わりに「コアイメージ」を記述
+// words.js 末尾（] の直前）に追記するだけで動きます
+// ============================================================
+  { en: "figure out", pos: "句動詞", kana: "フィギュラウト", ja: "理解する・解決策を見つける", cat: "日常会話",
+    ex: "A: The printer's broken again. / B: Don't worry, I'll figure it out.",
+    exJa: "A: プリンターまた壊れてる。／B: 大丈夫、なんとかするよ。",
+    etym: "コアイメージ: figure（形）を out（外に出す）→ もやもやをはっきりした形にする。目的語は figure it out と間に挟むのが自然" },
+
+  { en: "deal with", pos: "句動詞", kana: "ディールウィズ", ja: "対処する・相手をする", cat: "日常会話",
+    ex: "A: The client keeps changing his mind. / B: Yeah, he's hard to deal with.",
+    exJa: "A: あの客、コロコロ意見変えるんだよ。／B: だよね、扱いにくい人だよ。",
+    etym: "コアイメージ: deal（配る・分ける）→ 目の前の問題に手を配る。人にも物事にも使える万能動詞" },
+
+  { en: "run out of", pos: "句動詞", kana: "ラナウトブ", ja: "〜を切らす・使い果たす", cat: "日常会話",
+    ex: "A: Can you make coffee? / B: We ran out of beans yesterday.",
+    exJa: "A: コーヒー淹れてくれる？／B: 昨日豆切らしちゃった。",
+    etym: "コアイメージ: 中身が run（走って）out（外へ）出ていく。time / money / patience など何でも切らせる" },
+
+  { en: "end up", pos: "句動詞", kana: "エンダップ", ja: "結局〜になる", cat: "日常会話",
+    ex: "A: How was the trip? / B: Our flight got canceled, so we ended up taking the train.",
+    exJa: "A: 旅行どうだった？／B: 飛行機が欠航して、結局電車で行くことになったよ。",
+    etym: "コアイメージ: 紆余曲折の end（終点）に up（たどり着く）。end up -ing の形が最頻出" },
+
+  { en: "come up with", pos: "句動詞", kana: "カマップウィズ", ja: "（案・答えを）思いつく", cat: "日常会話",
+    ex: "A: We need a name for the team. / B: Give me a minute, I'll come up with something.",
+    exJa: "A: チーム名決めなきゃ。／B: ちょっと待って、何か考えるから。",
+    etym: "コアイメージ: アイデアと一緒に（with）水面に come up（浮かび上がってくる）" },
+
+  { en: "look forward to", pos: "句動詞", kana: "ルックフォワードトゥ", ja: "〜を楽しみにする", cat: "日常会話",
+    ex: "A: See you at the barbecue on Sunday! / B: Can't wait. I'm really looking forward to it.",
+    exJa: "A: 日曜のバーベキューでね！／B: 待ちきれないよ。すごく楽しみにしてる。",
+    etym: "コアイメージ: forward（前方＝未来）を look（見つめる）。後ろは動詞なら -ing（looking forward to seeing you）" },
+
+  { en: "hang out", pos: "句動詞", kana: "ハンガウト", ja: "（友達と）ぶらぶら過ごす・遊ぶ", cat: "日常会話",
+    ex: "A: What did you do this weekend? / B: Nothing much, just hung out with friends.",
+    exJa: "A: 週末何してた？／B: 特に何も、友達とだらだら過ごしてただけ。",
+    etym: "コアイメージ: 目的なくその場に hang（ぶら下がって）いる。「遊ぶ」= play は子供の遊び。大人は hang out" },
+
+  { en: "grab", pos: "動詞", kana: "グラブ", ja: "さっと取る・軽く食べる", cat: "日常会話",
+    ex: "A: I'm starving. / B: Wanna grab a bite before the movie?",
+    exJa: "A: 腹ペコだよ。／B: 映画の前に軽く何か食べる？",
+    etym: "コアイメージ: パッとつかむ → 手早く済ませる。grab lunch / grab a coffee / grab a seat が定番" },
+
+  { en: "kind of", pos: "副詞句", kana: "カインダ", ja: "なんか・ちょっと・まあまあ", cat: "日常会話",
+    ex: "A: You look tired. / B: Yeah, I'm kind of exhausted, actually.",
+    exJa: "A: 疲れてるね。／B: うん、実はけっこうヘトヘトなんだ。",
+    etym: "コアイメージ: 断言をぼかすクッション。発音は「カインダ（kinda）」。sort of もほぼ同じ" },
+
+  { en: "actually", pos: "副詞", kana: "アクチュアリー", ja: "実は・実際のところ", cat: "日常会話",
+    ex: "A: You're from Tokyo, right? / B: Actually, I grew up in Chiba.",
+    exJa: "A: 東京出身だよね？／B: 実は千葉育ちなんだ。",
+    etym: "コアイメージ: 相手の想定をやんわり訂正する合図。日本語の「じつは」とほぼ同じ働き" },
+
+  { en: "make sense", pos: "熟語", kana: "メイクセンス", ja: "筋が通る・なるほど", cat: "日常会話",
+    ex: "A: We take the early train, so we skip the traffic. / B: Ah, that makes sense.",
+    exJa: "A: 早い電車に乗れば渋滞を避けられるんだ。／B: ああ、なるほどね。",
+    etym: "コアイメージ: sense（意味）を make（成す）→ 意味が成立する。That makes sense. は相づちの最重要表現" },
+
+  { en: "no wonder", pos: "熟語", kana: "ノウワンダー", ja: "どうりで〜なわけだ", cat: "日常会話",
+    ex: "A: He stayed up all night gaming. / B: No wonder he's sleeping in class.",
+    exJa: "A: あいつ徹夜でゲームしてたんだよ。／B: どうりで授業中寝てるわけだ。",
+    etym: "コアイメージ: wonder（不思議）が no（ない）→ 不思議じゃない → どうりで" },
+
+  { en: "I was like", pos: "口語表現", kana: "アイワズライク", ja: "私は「〜」って感じで（発言・心境の引用）", cat: "日常会話",
+    ex: "A: What did you say when he told you? / B: I was like, are you serious?",
+    exJa: "A: 彼に言われて何て返したの？／B: 「マジで言ってる？」って感じだったよ。",
+    etym: "コアイメージ: say の代わりに気持ちごと再現する話し言葉。YouTubeやポッドキャストで超頻出。書き言葉では使わない" },
+
+  { en: "rain check", pos: "名詞（口語）", kana: "レインチェック", ja: "また今度（誘いの延期）", cat: "日常会話",
+    ex: "A: Dinner tonight? / B: I'm swamped. Rain check?",
+    exJa: "A: 今夜夕飯どう？／B: 仕事が山積みで。また今度でいい？",
+    etym: "コアイメージ: 野球が雨天中止のとき渡された「振替券」が語源。Can I take a rain check? が丁寧な形" },
+
+  { en: "swamped", pos: "形容詞（口語）", kana: "スワンプト", ja: "（仕事などで）手一杯の", cat: "日常会話",
+    ex: "A: Can you join the call at three? / B: Sorry, I'm totally swamped today.",
+    exJa: "A: 3時の電話会議出られる？／B: ごめん、今日は完全に手一杯なんだ。",
+    etym: "コアイメージ: swamp（沼）に沈められる → 仕事の沼に浸かって身動きできない。busy より切迫感が強い" },
+
+  { en: "catch up", pos: "句動詞", kana: "キャッチャップ", ja: "追いつく・近況を語り合う", cat: "日常会話",
+    ex: "A: It's been ages! / B: I know! Let's grab coffee and catch up.",
+    exJa: "A: 久しぶりだね！／B: ほんとに！コーヒーでも飲みながら積もる話しようよ。",
+    etym: "コアイメージ: 離れていた距離を catch（つかんで）up（追いつく）→ 空白期間の情報に追いつく" },
+
+  { en: "work out", pos: "句動詞", kana: "ワーカウト", ja: "うまくいく／運動する", cat: "日常会話",
+    ex: "A: How's the new job? / B: It's working out better than I expected.",
+    exJa: "A: 新しい仕事どう？／B: 思ってたよりうまくいってるよ。",
+    etym: "コアイメージ: work（機能）が out（最後まで）行き渡る → 結果が出る。ジムの「ワークアウト」は体に結果を出す方" },
+
+  { en: "turn out", pos: "句動詞", kana: "ターナウト", ja: "（結果として）〜だと判明する", cat: "日常会話",
+    ex: "A: Was the rumor true? / B: It turned out to be a misunderstanding.",
+    exJa: "A: あの噂ほんとだった？／B: 結局ただの誤解だったよ。",
+    etym: "コアイメージ: 隠れていた中身が turn（ひっくり返って）out（外に現れる）。It turns out (that)... はニュース解説でも頻出" },
+
+  { en: "That works.", pos: "口語表現", kana: "ザットワークス", ja: "それでOK・都合がつく", cat: "日常会話",
+    ex: "A: How about Friday at noon? / B: That works for me.",
+    exJa: "A: 金曜の正午はどう？／B: それで大丈夫だよ。",
+    etym: "コアイメージ: その案が work（機能する）→ 成立する。日程調整の最重要フレーズ。That works for me. が完全形" },
+
+  { en: "You know what?", pos: "口語表現", kana: "ユーノウワット", ja: "あのさ・ねえ聞いて（切り出し）", cat: "日常会話",
+    ex: "A: You know what? Let's just cancel and stay home. / B: Honestly? Best idea all day.",
+    exJa: "A: あのさ、もうキャンセルして家にいようよ。／B: 正直？今日一番の名案だね。",
+    etym: "コアイメージ: 相手の注意を引く前置き。直訳の「何を知ってる？」ではなく、日本語の「あのさ」「ねえ」に相当" }
+
 ].concat(typeof WORDS_EXTRA !== "undefined" ? WORDS_EXTRA : [])
  .concat(typeof WORDS_EXTRA2 !== "undefined" ? WORDS_EXTRA2 : []);
