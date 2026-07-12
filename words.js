@@ -540,4 +540,5 @@ const DEFAULT_WORDS = [
     etym: "コアイメージ: 相手の注意を引く前置き。直訳の「何を知ってる？」ではなく、日本語の「あのさ」「ねえ」に相当" }
 
 ].concat(typeof WORDS_EXTRA !== "undefined" ? WORDS_EXTRA : [])
- .concat(typeof WORDS_EXTRA2 !== "undefined" ? WORDS_EXTRA2 : []);
+ .concat(typeof WORDS_EXTRA2 !== "undefined" ? WORDS_EXTRA2 : [])
+ .concat(typeof WORDS_NEW !== "undefined" ? WORDS_NEW : []);
