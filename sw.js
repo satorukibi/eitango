@@ -8,7 +8,6 @@ const ASSETS = [
   "./words.js",
   "./words_extra.js",
   "./words_extra2.js",
-  "./words_new.js",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
