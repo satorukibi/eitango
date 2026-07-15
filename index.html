@@ -31,15 +31,15 @@
       });
     })();
   </script>
-  <title>英単語 - ニュース頻出（中級）</title>
-  <link rel="manifest" href="manifest.webmanifest?v=32" />
+  <title>どこでも英単語 ドリル - ニュース頻出（中級）</title>
+  <link rel="manifest" href="manifest.webmanifest?v=36" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=32" />
+  <link rel="stylesheet" href="style.css?v=36" />
 </head>
 <body>
   <header class="app-header">
     <div class="header-row">
-      <h1>英単語ドリル</h1>
+      <h1>どこでも英単語 <span class="title-sub">ドリル</span></h1>
       <span class="subtitle">ニュース・AI・戦争 / 中級 <span id="appVersion"></span></span>
     </div>
     <div class="header-stats">
@@ -56,19 +56,16 @@
       <span id="catCount" class="cat-count"></span>
     </div>
     <div class="header-actions header-actions-read">
-      <button id="readWordsBtn" class="btn btn-primary">▶ 単語を全部読む</button>
-      <button id="readWordsRandomBtn" class="btn btn-primary">▶ 単語をランダムに読む</button>
-      <button id="readAllBtn" class="btn btn-primary">▶ 例文を全部読む</button>
-      <button id="readWordExBtn" class="btn btn-primary">▶ 単語→例文を全部読む</button>
-      <button id="readWordJaBtn" class="btn btn-primary">▶ 単語→和訳を全部読む</button>
+      <button id="readWordsRandomBtn" class="btn btn-primary">▶ 単語(ランダム)</button>
+      <button id="readWordJaRandomBtn" class="btn btn-primary">▶ 単語→和訳(ランダム)</button>
+      <button id="readJaRandomBtn" class="btn btn-primary">▶ 和訳(ランダム)</button>
+      <button id="readJaWordRandomBtn" class="btn btn-primary">▶ 和訳→単語(ランダム)</button>
+      <button id="readWordExBtn" class="btn btn-primary">▶ 単語→例文(順番)</button>
+      <button id="readExJaBtn" class="btn btn-primary">▶ 例文和訳(順番)</button>
       <button id="stopBtn" class="btn btn-ghost" hidden>■ 停止</button>
     </div>
-    <div class="header-actions header-actions-read">
-      <button id="readJaBtn" class="btn btn-primary">▶ 和訳を全部読む</button>
-      <button id="readJaRandomBtn" class="btn btn-primary">▶ 和訳をランダムに読む</button>
-      <button id="readExJaBtn" class="btn btn-primary">▶ 例文和訳を全部読む</button>
-    </div>
     <div class="header-actions">
+      <button id="displayModeBtn" class="btn btn-ghost">🎓 トレーニングモードにする</button>
       <button id="showAllBtn" class="btn btn-ghost">和訳を全部表示</button>
       <button id="hideAllBtn" class="btn btn-ghost">和訳を隠す</button>
       <button id="shuffleBtn" class="btn btn-ghost">別の12語</button>
@@ -84,13 +81,13 @@
   <main id="cardList" class="card-list"></main>
 
   <div id="emptyState" class="empty-state" hidden>
-    <p>🎉 すべての単語を覚えました！</p>
+    <p id="emptyStateMsg">🎉 すべての単語を覚えました！</p>
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words_extra.js?v=32"></script>
-  <script src="words_extra2.js?v=32"></script>
-  <script src="words.js?v=32"></script>
-  <script src="app.js?v=32"></script>
+  <script src="words_extra.js?v=36"></script>
+  <script src="words_extra2.js?v=36"></script>
+  <script src="words.js?v=36"></script>
+  <script src="app.js?v=36"></script>
 </body>
 </html>

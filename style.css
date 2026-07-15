@@ -67,6 +67,11 @@ html, body {
   letter-spacing: 0.02em;
 }
 
+.title-sub {
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .subtitle { font-size: 12px; color: #94a3b8; }
 
 .header-stats {
@@ -367,6 +372,11 @@ html, body {
 .reveal.show { display: block; }
 .reveal .label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
 
+.reveal-syn,
+.reveal-etym {
+  font-style: italic;
+}
+
 .reveal-syn {
   background: #eff6ff;
   color: #1e3a8a;
@@ -380,7 +390,8 @@ html, body {
 .etym-self {
   margin: 0 0 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .syn-item {
@@ -395,6 +406,7 @@ html, body {
 .syn-en {
   font-weight: 800;
   font-size: 16px;
+  font-style: normal; /* 強調文字（単語そのもの）はゴシックのまま立体表示 */
 }
 
 .syn-pos {
@@ -408,8 +420,40 @@ html, body {
 .syn-ja {
   font-size: 14px;
   color: #334155;
-  font-weight: 600;
+  font-style: normal; /* 括弧・和訳・ニュアンスで書体を個別に制御する */
 }
+
+.syn-paren {
+  font-style: normal; /* カッコは斜体にしない */
+  font-weight: 400;
+}
+
+.syn-trans {
+  font-style: normal; /* 和訳はゴシック体で立体表示 */
+  font-weight: 700;
+}
+
+.syn-nuance {
+  font-style: italic; /* ニュアンス説明のみ斜体・通常の太さ */
+  font-weight: 400;
+}
+
+.mini-read-btn {
+  flex: 0 0 auto;
+  font-style: normal;
+  background: var(--card-soft);
+  color: var(--primary);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  font-size: 12px;
+  padding: 0;
+  cursor: pointer;
+}
+.mini-read-btn:active { transform: scale(0.9); }
+.mini-read-btn.speaking { background: #dbeafe; }
 
 .syn-none {
   margin: 4px 0 0;
