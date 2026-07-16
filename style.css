@@ -63,7 +63,7 @@ html, body {
 .app-header .brand {
   margin: 0;
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 7px;
   font-size: 24px;
   font-weight: 800;
@@ -72,6 +72,7 @@ html, body {
 }
 
 .brand-icon {
+  align-self: center;
   display: block;
   width: 31px;
   height: 31px;
@@ -85,7 +86,6 @@ html, body {
 }
 
 .title-sub {
-  align-self: flex-end;
   margin-left: 2px;
   padding: 0 2px 2px;
   color: #cbd5e1;
