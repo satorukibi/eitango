@@ -90,9 +90,12 @@ html, body {
   margin-left: 2px;
   padding: 2px 1px 5px;
   color: #cbd5e1;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-family: "Yu Kyokasho", "Klee", "Hiragino Maru Gothic ProN",
+    "Yu Gothic", cursive;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  transform: rotate(-3deg);
 }
 
 .title-sub::after {
