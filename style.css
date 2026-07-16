@@ -56,23 +56,69 @@ html, body {
 .header-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.app-header h1 {
+.app-header .brand {
   margin: 0;
-  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.brand-icon {
+  display: block;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+}
+
+.brand-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .title-sub {
-  font-size: 13px;
+  position: relative;
+  align-self: center;
+  margin-left: 2px;
+  padding: 2px 1px 5px;
+  color: #cbd5e1;
+  font-size: 14px;
   font-weight: 600;
+  letter-spacing: 0.12em;
 }
 
-.subtitle { font-size: 12px; color: #94a3b8; }
+.title-sub::after {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px 70% 999px 70%;
+  background: #2563eb;
+  content: "";
+  transform: rotate(-2deg);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+@media (max-width: 390px) {
+  .header-row { gap: 5px 10px; }
+  .app-header .brand { font-size: 23px; }
+  .brand-icon { width: 29px; height: 29px; }
+  .title-sub { font-size: 13px; }
+}
 
 .header-stats {
   display: flex;
