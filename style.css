@@ -88,26 +88,24 @@ html, body {
   position: relative;
   align-self: center;
   margin-left: 2px;
-  padding: 2px 1px 5px;
+  padding: 2px 2px 8px;
   color: #cbd5e1;
-  font-family: "Yu Kyokasho", "Klee", "Hiragino Maru Gothic ProN",
+  font-family: "Yomogi", "Yu Kyokasho", "Klee", "Hiragino Maru Gothic ProN",
     "Yu Gothic", cursive;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  transform: rotate(-3deg);
+  letter-spacing: 0.06em;
 }
 
 .title-sub::after {
   position: absolute;
-  right: 0;
-  bottom: 1px;
-  left: 0;
-  height: 3px;
-  border-radius: 999px 70% 999px 70%;
-  background: #2563eb;
+  right: -3px;
+  bottom: -2px;
+  left: -3px;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M3 9.5c4-4.5 8-6.5 12-4.5s6 6 11 4.5 7-7 12-5 5.5 6.5 10.5 5 6-7 11-5.5 6 6.5 11 5 6.5-6.5 11.5-5 6 6 11 4.5c4-1.2 6-3 8.5-3.5' fill='none' stroke='%232563eb' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat center / 100% 100%;
   content: "";
-  transform: rotate(-2deg);
 }
 
 .subtitle {
