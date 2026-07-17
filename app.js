@@ -6,12 +6,11 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "45";
+const APP_VERSION = "46";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
-const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み・クイズ形式用）
-const TRANSITION_PAUSE_MS = 1000;  // 答えを聞いた後、次の項目へ移るまでの短い休み（クイズ形式用）
-const FLOW_PAUSE_MS = 600;         // 記事を読みながら聞くための、待たずに流れる読み上げの短い休み
+const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み）
+const TRANSITION_PAUSE_MS = 1000;  // 答えを聞いた後、次の項目へ移るまでの短い休み
 const STORAGE_KEY = "eitango.learned.v1";
 const STORAGE_KEY_VISIBLE = "eitango.visible.v1";
 const STORAGE_KEY_CATEGORY = "eitango.category.v1";
@@ -173,14 +172,14 @@ const learnedCountEl = document.getElementById("learnedCount");
 const remainCountEl = document.getElementById("remainCount");
 const readWordsSeqBtn = document.getElementById("readWordsSeqBtn");
 const readWordJaSeqBtn = document.getElementById("readWordJaSeqBtn");
-const readWordJaFlowSeqBtn = document.getElementById("readWordJaFlowSeqBtn");
-const readWordJaFlowWordSeqBtn = document.getElementById("readWordJaFlowWordSeqBtn");
+const readJaSeqBtn = document.getElementById("readJaSeqBtn");
+const readJaWordSeqBtn = document.getElementById("readJaWordSeqBtn");
 const readWordExBtn = document.getElementById("readWordExBtn");
 const readExJaBtn = document.getElementById("readExJaBtn");
 const readWordsRandomBtn = document.getElementById("readWordsRandomBtn");
 const readWordJaRandomBtn = document.getElementById("readWordJaRandomBtn");
-const readWordJaFlowRandomBtn = document.getElementById("readWordJaFlowRandomBtn");
-const readWordJaFlowWordRandomBtn = document.getElementById("readWordJaFlowWordRandomBtn");
+const readJaRandomBtn = document.getElementById("readJaRandomBtn");
+const readJaWordRandomBtn = document.getElementById("readJaWordRandomBtn");
 const stopBtn = document.getElementById("stopBtn");
 const showAllBtn = document.getElementById("showAllBtn");
 const hideAllBtn = document.getElementById("hideAllBtn");
@@ -598,77 +597,61 @@ function speakExJaSequential() {
   );
 }
 
-// ---- フロー形式（待ち時間を作らず流れるように読む。記事を読みながら聞くのに向く） ----
+// 和訳（順番）：和訳を読む→3秒→次の和訳
+function speakJaSequential() {
+  const cards = visibleCards();
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].ja),
+    cards,
+    SELF_RECALL_PAUSE_MS,
+    makeJaUtterance
+  );
+}
 
-// 単語＋和訳（順番）：単語→短い間→和訳→短い間→次の単語
-function speakWordJaFlowSequential() {
+// 和訳（ランダム）：和訳を読む→3秒→次の和訳
+function speakJaRandom() {
+  const cards = shuffle([...visibleCards()]);
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].ja),
+    cards,
+    SELF_RECALL_PAUSE_MS,
+    makeJaUtterance
+  );
+}
+
+// 和訳→単語（順番）：和訳を読む→3秒→単語を読む→1秒→次の和訳
+function speakJaThenWordSequential() {
   const cards = visibleCards();
   const texts = [];
   const highlightCards = [];
   for (const c of cards) {
     const w = WORDS[Number(c.dataset.index)];
-    texts.push(w.en, w.ja);
+    texts.push(w.ja, w.en);
     highlightCards.push(c, c);
   }
   speakSequence(
     texts,
     highlightCards,
-    FLOW_PAUSE_MS,
-    (text, idx) => (idx % 2 === 0 ? makeEnUtterance(text) : makeJaUtterance(text))
+    pairPauseFn,
+    (text, idx) => (idx % 2 === 0 ? makeJaUtterance(text) : makeEnUtterance(text))
   );
 }
 
-// 単語＋和訳（ランダム）：単語→短い間→和訳→短い間→次の単語
-function speakWordJaFlowRandom() {
+// 和訳→単語（ランダム）：和訳を読む→3秒→単語を読む→1秒→次の和訳
+function speakJaThenWordRandom() {
   const cards = shuffle([...visibleCards()]);
   const texts = [];
   const highlightCards = [];
   for (const c of cards) {
     const w = WORDS[Number(c.dataset.index)];
-    texts.push(w.en, w.ja);
+    texts.push(w.ja, w.en);
     highlightCards.push(c, c);
   }
   speakSequence(
     texts,
     highlightCards,
-    FLOW_PAUSE_MS,
-    (text, idx) => (idx % 2 === 0 ? makeEnUtterance(text) : makeJaUtterance(text))
-  );
-}
-
-// 単語＋和訳→単語（順番）：単語→短い間→和訳→短い間→単語（もう一度）→短い間→次の単語
-function speakWordJaFlowThenWordSequential() {
-  const cards = visibleCards();
-  const texts = [];
-  const highlightCards = [];
-  for (const c of cards) {
-    const w = WORDS[Number(c.dataset.index)];
-    texts.push(w.en, w.ja, w.en);
-    highlightCards.push(c, c, c);
-  }
-  speakSequence(
-    texts,
-    highlightCards,
-    FLOW_PAUSE_MS,
-    (text, idx) => (idx % 3 === 1 ? makeJaUtterance(text) : makeEnUtterance(text))
-  );
-}
-
-// 単語＋和訳→単語（ランダム）：単語→短い間→和訳→短い間→単語（もう一度）→短い間→次の単語
-function speakWordJaFlowThenWordRandom() {
-  const cards = shuffle([...visibleCards()]);
-  const texts = [];
-  const highlightCards = [];
-  for (const c of cards) {
-    const w = WORDS[Number(c.dataset.index)];
-    texts.push(w.en, w.ja, w.en);
-    highlightCards.push(c, c, c);
-  }
-  speakSequence(
-    texts,
-    highlightCards,
-    FLOW_PAUSE_MS,
-    (text, idx) => (idx % 3 === 1 ? makeJaUtterance(text) : makeEnUtterance(text))
+    pairPauseFn,
+    (text, idx) => (idx % 2 === 0 ? makeJaUtterance(text) : makeEnUtterance(text))
   );
 }
 
@@ -1128,14 +1111,14 @@ function renderLearnedPanel() {
 // ---- イベント ----
 readWordsSeqBtn.addEventListener("click", speakWordsSequential);
 readWordJaSeqBtn.addEventListener("click", speakWordThenJaSequential);
-readWordJaFlowSeqBtn.addEventListener("click", speakWordJaFlowSequential);
-readWordJaFlowWordSeqBtn.addEventListener("click", speakWordJaFlowThenWordSequential);
+readJaSeqBtn.addEventListener("click", speakJaSequential);
+readJaWordSeqBtn.addEventListener("click", speakJaThenWordSequential);
 readWordExBtn.addEventListener("click", speakWordThenExample);
 readExJaBtn.addEventListener("click", speakExJaSequential);
 readWordsRandomBtn.addEventListener("click", speakWordsRandom);
 readWordJaRandomBtn.addEventListener("click", speakWordThenJaRandom);
-readWordJaFlowRandomBtn.addEventListener("click", speakWordJaFlowRandom);
-readWordJaFlowWordRandomBtn.addEventListener("click", speakWordJaFlowThenWordRandom);
+readJaRandomBtn.addEventListener("click", speakJaRandom);
+readJaWordRandomBtn.addEventListener("click", speakJaThenWordRandom);
 stopBtn.addEventListener("click", stopSpeaking);
 showAllBtn.addEventListener("click", () => toggleAllReveals(true));
 hideAllBtn.addEventListener("click", () => toggleAllReveals(false));
