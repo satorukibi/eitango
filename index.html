@@ -38,16 +38,16 @@
     href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
     rel="stylesheet"
   />
-  <link rel="manifest" href="manifest.webmanifest?v=44" />
+  <link rel="manifest" href="manifest.webmanifest?v=45" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=44" />
+  <link rel="stylesheet" href="style.css?v=45" />
 </head>
 <body>
   <header class="app-header">
     <div class="header-row">
       <h1 class="brand">
         <span class="brand-icon" aria-hidden="true">
-          <img src="header-logo.svg?v=44" alt="" />
+          <img src="header-logo.svg?v=45" alt="" />
         </span>
         <span class="brand-name">どこでも英単語</span>
         <span class="title-sub">ドリル</span>
@@ -67,17 +67,27 @@
       <select id="catSelect" aria-label="属性で絞り込み"></select>
       <span id="catCount" class="cat-count"></span>
     </div>
+    <div class="header-actions mode-actions">
+      <button class="btn btn-ghost mode-btn" data-mode="normal">通常</button>
+      <button class="btn btn-ghost mode-btn" data-mode="no-ja">和訳なし</button>
+      <button class="btn btn-ghost mode-btn" data-mode="full">全部表示</button>
+    </div>
+    <div class="header-actions header-actions-read">
+      <button id="readWordsSeqBtn" class="btn btn-primary">▶ 単語(順番)</button>
+      <button id="readWordJaSeqBtn" class="btn btn-primary">▶ 単語→和訳(順番)</button>
+      <button id="readWordExBtn" class="btn btn-primary">▶ 単語→例文(順番)</button>
+      <button id="readWordJaFlowSeqBtn" class="btn btn-primary">▶ 単語＋和訳(順番)</button>
+      <button id="readWordJaFlowWordSeqBtn" class="btn btn-primary">▶ 単語＋和訳→単語(順番)</button>
+      <button id="readExJaBtn" class="btn btn-primary">▶ 例文和訳(順番)</button>
+    </div>
     <div class="header-actions header-actions-read">
       <button id="readWordsRandomBtn" class="btn btn-primary">▶ 単語(ランダム)</button>
       <button id="readWordJaRandomBtn" class="btn btn-primary">▶ 単語→和訳(ランダム)</button>
-      <button id="readJaRandomBtn" class="btn btn-primary">▶ 和訳(ランダム)</button>
-      <button id="readJaWordRandomBtn" class="btn btn-primary">▶ 和訳→単語(ランダム)</button>
-      <button id="readWordExBtn" class="btn btn-primary">▶ 単語→例文(順番)</button>
-      <button id="readExJaBtn" class="btn btn-primary">▶ 例文和訳(順番)</button>
+      <button id="readWordJaFlowRandomBtn" class="btn btn-primary">▶ 単語＋和訳(ランダム)</button>
+      <button id="readWordJaFlowWordRandomBtn" class="btn btn-primary">▶ 単語＋和訳→単語(ランダム)</button>
       <button id="stopBtn" class="btn btn-ghost" hidden>■ 停止</button>
     </div>
     <div class="header-actions">
-      <button id="displayModeBtn" class="btn btn-ghost">🎓 トレーニングモードにする</button>
       <button id="showAllBtn" class="btn btn-ghost">和訳を全部表示</button>
       <button id="hideAllBtn" class="btn btn-ghost">和訳を隠す</button>
       <button id="shuffleBtn" class="btn btn-ghost">別の12語</button>
@@ -97,9 +107,9 @@
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words_extra.js?v=44"></script>
-  <script src="words_extra2.js?v=44"></script>
-  <script src="words.js?v=44"></script>
-  <script src="app.js?v=44"></script>
+  <script src="words_extra.js?v=45"></script>
+  <script src="words_extra2.js?v=45"></script>
+  <script src="words.js?v=45"></script>
+  <script src="app.js?v=45"></script>
 </body>
 </html>

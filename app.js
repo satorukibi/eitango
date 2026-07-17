@@ -6,11 +6,12 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "44";
+const APP_VERSION = "45";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
-const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み）
-const TRANSITION_PAUSE_MS = 1000;  // 答えを聞いた後、次の項目へ移るまでの短い休み
+const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み・クイズ形式用）
+const TRANSITION_PAUSE_MS = 1000;  // 答えを聞いた後、次の項目へ移るまでの短い休み（クイズ形式用）
+const FLOW_PAUSE_MS = 600;         // 記事を読みながら聞くための、待たずに流れる読み上げの短い休み
 const STORAGE_KEY = "eitango.learned.v1";
 const STORAGE_KEY_VISIBLE = "eitango.visible.v1";
 const STORAGE_KEY_CATEGORY = "eitango.category.v1";
@@ -162,7 +163,7 @@ const WORDS = (() => {
 let learned = loadLearned();
 let visible = [];
 let selectedCategory = loadCategory();
-let displayMode = loadDisplayMode(); // "full"(全部表示) | "training"(トレーニング)
+let displayMode = loadDisplayMode(); // "normal"(通常) | "no-ja"(和訳なし) | "full"(全部表示)
 
 // ---- 要素 ----
 const cardList = document.getElementById("cardList");
@@ -170,16 +171,20 @@ const emptyState = document.getElementById("emptyState");
 const emptyStateMsg = document.getElementById("emptyStateMsg");
 const learnedCountEl = document.getElementById("learnedCount");
 const remainCountEl = document.getElementById("remainCount");
-const readWordsRandomBtn = document.getElementById("readWordsRandomBtn");
-const readWordJaRandomBtn = document.getElementById("readWordJaRandomBtn");
-const readJaRandomBtn = document.getElementById("readJaRandomBtn");
-const readJaWordRandomBtn = document.getElementById("readJaWordRandomBtn");
+const readWordsSeqBtn = document.getElementById("readWordsSeqBtn");
+const readWordJaSeqBtn = document.getElementById("readWordJaSeqBtn");
+const readWordJaFlowSeqBtn = document.getElementById("readWordJaFlowSeqBtn");
+const readWordJaFlowWordSeqBtn = document.getElementById("readWordJaFlowWordSeqBtn");
 const readWordExBtn = document.getElementById("readWordExBtn");
 const readExJaBtn = document.getElementById("readExJaBtn");
+const readWordsRandomBtn = document.getElementById("readWordsRandomBtn");
+const readWordJaRandomBtn = document.getElementById("readWordJaRandomBtn");
+const readWordJaFlowRandomBtn = document.getElementById("readWordJaFlowRandomBtn");
+const readWordJaFlowWordRandomBtn = document.getElementById("readWordJaFlowWordRandomBtn");
 const stopBtn = document.getElementById("stopBtn");
 const showAllBtn = document.getElementById("showAllBtn");
 const hideAllBtn = document.getElementById("hideAllBtn");
-const displayModeBtn = document.getElementById("displayModeBtn");
+const modeButtons = [...document.querySelectorAll(".mode-btn")];
 const shuffleBtn = document.getElementById("shuffleBtn");
 const learnedListBtn = document.getElementById("learnedListBtn");
 const learnedPanel = document.getElementById("learnedPanel");
@@ -222,13 +227,20 @@ function saveCategory() {
   } catch (e) {}
 }
 
-// ---- 表示モード（全部表示 / トレーニング）の保存・読み込み ----
+// ---- 表示モード（通常 / 和訳なし / 全部表示）の保存・読み込み ----
+// 通常　　　: 単語の和訳は自動表示、類語・語源・例文の和訳はタップで表示（電車の中などサッと読むのに向く）
+// 和訳なし　: 単語の和訳もタップするまで隠す（自分で意味を思い出す練習用）
+// 全部表示　: 単語の和訳・例文の和訳・類語・語源をすべて自動表示（じっくり読みたいとき向け）
+const DISPLAY_MODES = ["normal", "no-ja", "full"];
+
 function loadDisplayMode() {
   try {
     const v = localStorage.getItem(STORAGE_KEY_DISPLAY_MODE);
-    return v === "training" ? "training" : "full";
+    if (DISPLAY_MODES.includes(v)) return v;
+    if (v === "training") return "no-ja"; // 旧モードからの移行
+    return "normal";
   } catch (e) {
-    return "full";
+    return "normal";
   }
 }
 
@@ -238,12 +250,10 @@ function saveDisplayMode() {
   } catch (e) {}
 }
 
-function displayModeBtnLabel() {
-  return displayMode === "full" ? "🎓 トレーニングモードにする" : "📖 全部表示モードにする";
-}
-
-function updateDisplayModeBtn() {
-  if (displayModeBtn) displayModeBtn.textContent = displayModeBtnLabel();
+function updateModeButtons() {
+  modeButtons.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.mode === displayMode);
+  });
 }
 
 function poolWords() {
@@ -506,7 +516,19 @@ function visibleCards() {
   return [...cardList.querySelectorAll(".word-card")];
 }
 
-// 1. 単語（ランダム）：単語を読む→3秒→次の単語
+// ---- クイズ形式（単語→3秒→答え、で自分で思い出す時間を作る） ----
+
+// 単語（順番）：単語を読む→3秒→次の単語
+function speakWordsSequential() {
+  const cards = visibleCards();
+  speakSequence(
+    cards.map((c) => WORDS[Number(c.dataset.index)].en),
+    cards,
+    SELF_RECALL_PAUSE_MS
+  );
+}
+
+// 単語（ランダム）：単語を読む→3秒→次の単語
 function speakWordsRandom() {
   const cards = shuffle([...visibleCards()]);
   speakSequence(
@@ -516,7 +538,25 @@ function speakWordsRandom() {
   );
 }
 
-// 2. 単語→和訳（ランダム）：単語を読む→3秒→和訳を読む→1秒→次の単語
+// 単語→和訳（順番）：単語を読む→3秒→和訳を読む→1秒→次の単語
+function speakWordThenJaSequential() {
+  const cards = visibleCards();
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ja);
+    highlightCards.push(c, c);
+  }
+  speakSequence(
+    texts,
+    highlightCards,
+    pairPauseFn,
+    (text, idx) => (idx % 2 === 0 ? makeEnUtterance(text) : makeJaUtterance(text))
+  );
+}
+
+// 単語→和訳（ランダム）：単語を読む→3秒→和訳を読む→1秒→次の単語
 function speakWordThenJaRandom() {
   const cards = shuffle([...visibleCards()]);
   const texts = [];
@@ -534,36 +574,7 @@ function speakWordThenJaRandom() {
   );
 }
 
-// 3. 和訳（ランダム）：和訳を読む→3秒→次の和訳
-function speakJaRandom() {
-  const cards = shuffle([...visibleCards()]);
-  speakSequence(
-    cards.map((c) => WORDS[Number(c.dataset.index)].ja),
-    cards,
-    SELF_RECALL_PAUSE_MS,
-    makeJaUtterance
-  );
-}
-
-// 4. 和訳→単語（ランダム）：和訳を読む→3秒→単語を読む→1秒→次の和訳
-function speakJaThenWordRandom() {
-  const cards = shuffle([...visibleCards()]);
-  const texts = [];
-  const highlightCards = [];
-  for (const c of cards) {
-    const w = WORDS[Number(c.dataset.index)];
-    texts.push(w.ja, w.en);
-    highlightCards.push(c, c);
-  }
-  speakSequence(
-    texts,
-    highlightCards,
-    pairPauseFn,
-    (text, idx) => (idx % 2 === 0 ? makeJaUtterance(text) : makeEnUtterance(text))
-  );
-}
-
-// 5. 単語→例文（順番通り）：単語を読む→3秒→例文を読む→1秒→次の単語
+// 単語→例文（順番通り）：単語を読む→3秒→例文を読む→1秒→次の単語
 function speakWordThenExample() {
   const cards = visibleCards();
   const texts = [];
@@ -576,7 +587,7 @@ function speakWordThenExample() {
   speakSequence(texts, highlightCards, pairPauseFn);
 }
 
-// 6. 例文和訳（順番通り）：例文和訳を読む→3秒→次の例文和訳
+// 例文和訳（順番通り）：例文和訳を読む→3秒→次の例文和訳
 function speakExJaSequential() {
   const cards = visibleCards();
   speakSequence(
@@ -584,6 +595,80 @@ function speakExJaSequential() {
     cards,
     SELF_RECALL_PAUSE_MS,
     makeJaUtterance
+  );
+}
+
+// ---- フロー形式（待ち時間を作らず流れるように読む。記事を読みながら聞くのに向く） ----
+
+// 単語＋和訳（順番）：単語→短い間→和訳→短い間→次の単語
+function speakWordJaFlowSequential() {
+  const cards = visibleCards();
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ja);
+    highlightCards.push(c, c);
+  }
+  speakSequence(
+    texts,
+    highlightCards,
+    FLOW_PAUSE_MS,
+    (text, idx) => (idx % 2 === 0 ? makeEnUtterance(text) : makeJaUtterance(text))
+  );
+}
+
+// 単語＋和訳（ランダム）：単語→短い間→和訳→短い間→次の単語
+function speakWordJaFlowRandom() {
+  const cards = shuffle([...visibleCards()]);
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ja);
+    highlightCards.push(c, c);
+  }
+  speakSequence(
+    texts,
+    highlightCards,
+    FLOW_PAUSE_MS,
+    (text, idx) => (idx % 2 === 0 ? makeEnUtterance(text) : makeJaUtterance(text))
+  );
+}
+
+// 単語＋和訳→単語（順番）：単語→短い間→和訳→短い間→単語（もう一度）→短い間→次の単語
+function speakWordJaFlowThenWordSequential() {
+  const cards = visibleCards();
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ja, w.en);
+    highlightCards.push(c, c, c);
+  }
+  speakSequence(
+    texts,
+    highlightCards,
+    FLOW_PAUSE_MS,
+    (text, idx) => (idx % 3 === 1 ? makeJaUtterance(text) : makeEnUtterance(text))
+  );
+}
+
+// 単語＋和訳→単語（ランダム）：単語→短い間→和訳→短い間→単語（もう一度）→短い間→次の単語
+function speakWordJaFlowThenWordRandom() {
+  const cards = shuffle([...visibleCards()]);
+  const texts = [];
+  const highlightCards = [];
+  for (const c of cards) {
+    const w = WORDS[Number(c.dataset.index)];
+    texts.push(w.en, w.ja, w.en);
+    highlightCards.push(c, c, c);
+  }
+  speakSequence(
+    texts,
+    highlightCards,
+    FLOW_PAUSE_MS,
+    (text, idx) => (idx % 3 === 1 ? makeJaUtterance(text) : makeEnUtterance(text))
   );
 }
 
@@ -839,9 +924,14 @@ function createCard(wordIndex, displayNum) {
     markLearned(card, wordIndex);
   });
 
-  // 全部表示モードなら、和訳・類語・語源をあらかじめ展開しておく
-  if (displayMode === "full") {
+  // 表示モードに応じて、あらかじめ展開しておく項目を切り替える
+  //  通常　　　: 単語の和訳のみ自動表示
+  //  和訳なし　: 何も自動表示しない（タップして自分で確認）
+  //  全部表示　: 単語の和訳・例文の和訳・類語・語源をすべて自動表示
+  if (displayMode === "normal" || displayMode === "full") {
     toggleReveal(card, "word", card.querySelector('[data-toggle="word"]'));
+  }
+  if (displayMode === "full") {
     toggleReveal(card, "ex", card.querySelector('[data-toggle="ex"]'));
     toggleSynonyms(card, wordIndex, card.querySelector("[data-synonym]"));
     toggleEtymology(card, wordIndex, card.querySelector("[data-etymology]"));
@@ -1036,26 +1126,31 @@ function renderLearnedPanel() {
 }
 
 // ---- イベント ----
-readWordsRandomBtn.addEventListener("click", speakWordsRandom);
-readWordJaRandomBtn.addEventListener("click", speakWordThenJaRandom);
-readJaRandomBtn.addEventListener("click", speakJaRandom);
-readJaWordRandomBtn.addEventListener("click", speakJaThenWordRandom);
+readWordsSeqBtn.addEventListener("click", speakWordsSequential);
+readWordJaSeqBtn.addEventListener("click", speakWordThenJaSequential);
+readWordJaFlowSeqBtn.addEventListener("click", speakWordJaFlowSequential);
+readWordJaFlowWordSeqBtn.addEventListener("click", speakWordJaFlowThenWordSequential);
 readWordExBtn.addEventListener("click", speakWordThenExample);
 readExJaBtn.addEventListener("click", speakExJaSequential);
+readWordsRandomBtn.addEventListener("click", speakWordsRandom);
+readWordJaRandomBtn.addEventListener("click", speakWordThenJaRandom);
+readWordJaFlowRandomBtn.addEventListener("click", speakWordJaFlowRandom);
+readWordJaFlowWordRandomBtn.addEventListener("click", speakWordJaFlowThenWordRandom);
 stopBtn.addEventListener("click", stopSpeaking);
 showAllBtn.addEventListener("click", () => toggleAllReveals(true));
 hideAllBtn.addEventListener("click", () => toggleAllReveals(false));
-if (displayModeBtn) {
-  updateDisplayModeBtn();
-  displayModeBtn.addEventListener("click", () => {
-    displayMode = displayMode === "full" ? "training" : "full";
+updateModeButtons();
+modeButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (displayMode === btn.dataset.mode) return;
+    displayMode = btn.dataset.mode;
     saveDisplayMode();
-    updateDisplayModeBtn();
+    updateModeButtons();
     stopSpeaking();
     cardList.innerHTML = "";
     visible.forEach((wi, i) => cardList.appendChild(createCard(wi, i + 1)));
   });
-}
+});
 // 類語・語源検索結果の「読む」ボタン（イベント委譲）
 cardList.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-speak-en]");

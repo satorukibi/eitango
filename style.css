@@ -202,6 +202,16 @@ html, body {
   border: 1px solid #475569;
 }
 
+.mode-actions {
+  margin-top: 10px;
+}
+
+.mode-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
 /* ---------- 音声情報パネル ---------- */
 .voice-panel {
   margin-top: 10px;
