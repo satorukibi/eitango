@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "46";
+const APP_VERSION = "47";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
 const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み）
@@ -181,8 +181,6 @@ const readWordJaRandomBtn = document.getElementById("readWordJaRandomBtn");
 const readJaRandomBtn = document.getElementById("readJaRandomBtn");
 const readJaWordRandomBtn = document.getElementById("readJaWordRandomBtn");
 const stopBtn = document.getElementById("stopBtn");
-const showAllBtn = document.getElementById("showAllBtn");
-const hideAllBtn = document.getElementById("hideAllBtn");
 const modeButtons = [...document.querySelectorAll(".mode-btn")];
 const shuffleBtn = document.getElementById("shuffleBtn");
 const learnedListBtn = document.getElementById("learnedListBtn");
@@ -226,11 +224,12 @@ function saveCategory() {
   } catch (e) {}
 }
 
-// ---- 表示モード（通常 / 和訳なし / 全部表示）の保存・読み込み ----
-// 通常　　　: 単語の和訳は自動表示、類語・語源・例文の和訳はタップで表示（電車の中などサッと読むのに向く）
-// 和訳なし　: 単語の和訳もタップするまで隠す（自分で意味を思い出す練習用）
-// 全部表示　: 単語の和訳・例文の和訳・類語・語源をすべて自動表示（じっくり読みたいとき向け）
-const DISPLAY_MODES = ["normal", "no-ja", "full"];
+// ---- 表示モード（和訳なし / 和訳あり / 単語・例文和訳あり / 全部表示）の保存・読み込み ----
+// 和訳なし　　　　　: 単語の和訳もタップするまで隠す（自分で意味を思い出す練習用）
+// 和訳あり　　　　　: 単語の和訳のみ自動表示（電車の中などサッと読むのに向く）
+// 単語・例文和訳あり: 単語の和訳・例文の和訳を自動表示、類語・語源はタップで表示
+// 全部表示　　　　　: 単語の和訳・例文の和訳・類語・語源をすべて自動表示（じっくり読みたいとき向け）
+const DISPLAY_MODES = ["no-ja", "normal", "ex", "full"];
 
 function loadDisplayMode() {
   try {
@@ -908,14 +907,17 @@ function createCard(wordIndex, displayNum) {
   });
 
   // 表示モードに応じて、あらかじめ展開しておく項目を切り替える
-  //  通常　　　: 単語の和訳のみ自動表示
-  //  和訳なし　: 何も自動表示しない（タップして自分で確認）
-  //  全部表示　: 単語の和訳・例文の和訳・類語・語源をすべて自動表示
-  if (displayMode === "normal" || displayMode === "full") {
+  //  和訳なし　　　　　: 何も自動表示しない（タップして自分で確認）
+  //  和訳あり　　　　　: 単語の和訳のみ自動表示
+  //  単語・例文和訳あり: 単語の和訳・例文の和訳を自動表示
+  //  全部表示　　　　　: 単語の和訳・例文の和訳・類語・語源をすべて自動表示
+  if (displayMode === "normal" || displayMode === "ex" || displayMode === "full") {
     toggleReveal(card, "word", card.querySelector('[data-toggle="word"]'));
   }
-  if (displayMode === "full") {
+  if (displayMode === "ex" || displayMode === "full") {
     toggleReveal(card, "ex", card.querySelector('[data-toggle="ex"]'));
+  }
+  if (displayMode === "full") {
     toggleSynonyms(card, wordIndex, card.querySelector("[data-synonym]"));
     toggleEtymology(card, wordIndex, card.querySelector("[data-etymology]"));
   }
@@ -1032,25 +1034,6 @@ function highlightWord(word, text) {
   return safe.replace(re, '<mark class="word-hit">$1</mark>');
 }
 
-// 全カードの和訳を一括表示/非表示
-function toggleAllReveals(show) {
-  cardList.querySelectorAll(".reveal").forEach((el) => {
-    if (el.dataset.reveal === "syn" || el.dataset.reveal === "etym") {
-      el.classList.remove("show");
-      el.innerHTML = "";
-      return;
-    }
-    el.classList.toggle("show", show);
-  });
-  cardList.querySelectorAll(".reveal-btn").forEach((btn) => {
-    if (btn.hasAttribute("data-synonym") || btn.hasAttribute("data-etymology")) {
-      btn.classList.remove("done");
-      return;
-    }
-    btn.classList.toggle("done", show);
-  });
-}
-
 // 画面の12語を別の未学習単語に入れ替え（進捗は変えない）
 function reshuffleVisible() {
   stopSpeaking();
@@ -1120,8 +1103,6 @@ readWordJaRandomBtn.addEventListener("click", speakWordThenJaRandom);
 readJaRandomBtn.addEventListener("click", speakJaRandom);
 readJaWordRandomBtn.addEventListener("click", speakJaThenWordRandom);
 stopBtn.addEventListener("click", stopSpeaking);
-showAllBtn.addEventListener("click", () => toggleAllReveals(true));
-hideAllBtn.addEventListener("click", () => toggleAllReveals(false));
 updateModeButtons();
 modeButtons.forEach((btn) => {
   btn.addEventListener("click", () => {

@@ -38,16 +38,16 @@
     href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
     rel="stylesheet"
   />
-  <link rel="manifest" href="manifest.webmanifest?v=46" />
+  <link rel="manifest" href="manifest.webmanifest?v=47" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=46" />
+  <link rel="stylesheet" href="style.css?v=47" />
 </head>
 <body>
   <header class="app-header">
     <div class="header-row">
       <h1 class="brand">
         <span class="brand-icon" aria-hidden="true">
-          <img src="header-logo.svg?v=46" alt="" />
+          <img src="header-logo.svg?v=47" alt="" />
         </span>
         <span class="brand-name">どこでも英単語</span>
         <span class="title-sub">ドリル</span>
@@ -68,8 +68,9 @@
       <span id="catCount" class="cat-count"></span>
     </div>
     <div class="header-actions mode-actions">
-      <button class="btn btn-ghost mode-btn" data-mode="normal">通常</button>
       <button class="btn btn-ghost mode-btn" data-mode="no-ja">和訳なし</button>
+      <button class="btn btn-ghost mode-btn" data-mode="normal">和訳あり</button>
+      <button class="btn btn-ghost mode-btn" data-mode="ex">単語・例文和訳あり</button>
       <button class="btn btn-ghost mode-btn" data-mode="full">全部表示</button>
     </div>
     <div class="header-actions header-actions-read">
@@ -88,8 +89,6 @@
       <button id="stopBtn" class="btn btn-ghost" hidden>■ 停止</button>
     </div>
     <div class="header-actions">
-      <button id="showAllBtn" class="btn btn-ghost">和訳を全部表示</button>
-      <button id="hideAllBtn" class="btn btn-ghost">和訳を隠す</button>
       <button id="shuffleBtn" class="btn btn-ghost">別の12語</button>
       <button id="learnedListBtn" class="btn btn-ghost">覚えた一覧</button>
       <button id="resetBtn" class="btn btn-ghost">リセット</button>
@@ -107,9 +106,9 @@
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words_extra.js?v=46"></script>
-  <script src="words_extra2.js?v=46"></script>
-  <script src="words.js?v=46"></script>
-  <script src="app.js?v=46"></script>
+  <script src="words_extra.js?v=47"></script>
+  <script src="words_extra2.js?v=47"></script>
+  <script src="words.js?v=47"></script>
+  <script src="app.js?v=47"></script>
 </body>
 </html>
