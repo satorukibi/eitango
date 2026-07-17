@@ -56,8 +56,26 @@ html, body {
 .header-row {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  column-gap: 0;
+  row-gap: 6px;
   flex-wrap: wrap;
+}
+
+.header-mascot {
+  width: 64px;
+  height: 64px;
+  margin-left: auto;
+  margin-right: 10px;
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: 50% 5%;
+  border: 1px solid #334155;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+@media (max-width: 390px) {
+  .header-mascot { width: 52px; height: 52px; }
 }
 
 .app-header .brand {
@@ -65,24 +83,10 @@ html, body {
   display: inline-flex;
   align-items: baseline;
   gap: 7px;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: 0.02em;
   white-space: nowrap;
-}
-
-.brand-icon {
-  align-self: center;
-  display: block;
-  width: 31px;
-  height: 31px;
-  flex: 0 0 auto;
-}
-
-.brand-icon img {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .title-sub {
@@ -91,22 +95,27 @@ html, body {
   color: #cbd5e1;
   font-family: "Yomogi", "Yu Kyokasho", "Klee", "Hiragino Maru Gothic ProN",
     "Yu Gothic", cursive;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   letter-spacing: 0.06em;
 }
 
 .subtitle {
-  font-size: 12px;
+  margin-left: 0.5em;
+  font-size: 20px;
   color: #94a3b8;
   white-space: nowrap;
 }
 
+#appVersion {
+  font-size: 12px;
+}
+
 @media (max-width: 390px) {
-  .header-row { gap: 5px 10px; }
-  .app-header .brand { font-size: 23px; }
-  .brand-icon { width: 29px; height: 29px; }
-  .title-sub { font-size: 13px; }
+  .header-row { row-gap: 5px; }
+  .app-header .brand { font-size: 25px; }
+  .title-sub { font-size: 15px; }
+  .subtitle { font-size: 15px; }
 }
 
 .header-stats {
@@ -204,6 +213,14 @@ html, body {
 
 .mode-actions {
   margin-top: 10px;
+  flex-wrap: nowrap;
+}
+
+.mode-btn {
+  flex: 1 1 0;
+  padding: 8px 2px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .mode-btn.active {
