@@ -38,9 +38,9 @@
     href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
     rel="stylesheet"
   />
-  <link rel="manifest" href="manifest.webmanifest?v=53" />
-  <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=53" />
+  <link rel="manifest" href="manifest.webmanifest?v=54" />
+  <link rel="apple-touch-icon" href="header-cat.png?v=54" />
+  <link rel="stylesheet" href="style.css?v=54" />
 </head>
 <body>
   <header class="app-header">
@@ -50,7 +50,7 @@
         <span class="title-sub">ドリル</span>
       </h1>
       <span class="subtitle">中級 <span id="appVersion"></span></span>
-      <img class="header-mascot" src="header-cat.png?v=53" alt="" />
+      <img class="header-mascot" src="header-cat.png?v=54" alt="" />
     </div>
     <div class="header-stats">
       <span id="learnedCount">覚えた: 0</span>
@@ -86,15 +86,6 @@
       <button id="readJaWordRandomBtn" class="btn btn-primary">▶ 和訳→単語(ランダム)</button>
       <button id="stopBtn" class="btn btn-ghost" hidden>■ 停止</button>
     </div>
-    <div class="header-actions">
-      <button id="shuffleBtn" class="btn btn-ghost">別の12語</button>
-      <button id="learnedListBtn" class="btn btn-ghost">覚えた一覧</button>
-      <button id="resetBtn" class="btn btn-ghost">リセット</button>
-      <button id="updateBtn" class="btn btn-ghost">🔄 最新版に更新</button>
-      <button id="voiceInfoBtn" class="btn btn-ghost">🔧 音声情報</button>
-    </div>
-    <div id="learnedPanel" class="learned-panel" hidden></div>
-    <div id="voicePanel" class="voice-panel" hidden></div>
   </header>
 
   <main id="cardList" class="card-list"></main>
@@ -104,9 +95,23 @@
     <button id="restartBtn" class="btn btn-primary">もう一度はじめから</button>
   </div>
 
-  <script src="words_extra.js?v=53"></script>
-  <script src="words_extra2.js?v=53"></script>
-  <script src="words.js?v=53"></script>
-  <script src="app.js?v=53"></script>
+  <footer class="app-management" aria-label="管理用メニュー">
+    <p class="management-title">管理用メニュー</p>
+    <div class="header-actions">
+      <button id="previousGroupBtn" class="btn btn-ghost" disabled>前の単語グループに戻す</button>
+      <button id="shuffleBtn" class="btn btn-ghost">別の12語</button>
+      <button id="learnedListBtn" class="btn btn-ghost">覚えた一覧</button>
+      <button id="resetBtn" class="btn btn-ghost">リセット</button>
+      <button id="updateBtn" class="btn btn-ghost">🔄 最新版に更新</button>
+      <button id="voiceInfoBtn" class="btn btn-ghost">🔧 音声情報</button>
+    </div>
+    <div id="learnedPanel" class="learned-panel" hidden></div>
+    <div id="voicePanel" class="voice-panel" hidden></div>
+  </footer>
+
+  <script src="words_extra.js?v=54"></script>
+  <script src="words_extra2.js?v=54"></script>
+  <script src="words.js?v=54"></script>
+  <script src="app.js?v=54"></script>
 </body>
 </html>

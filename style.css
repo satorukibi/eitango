@@ -229,6 +229,34 @@ html, body {
   border-color: var(--primary);
 }
 
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- 画面末尾の管理用メニュー ---------- */
+.app-management {
+  max-width: var(--content-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px max(var(--content-padding), env(safe-area-inset-right))
+    calc(env(safe-area-inset-bottom) + 28px)
+    max(var(--content-padding), env(safe-area-inset-left));
+  border-top: 1px solid #334155;
+  color: #fff;
+}
+
+.management-title {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.app-management .header-actions {
+  margin-top: 10px;
+}
+
 /* ---------- 音声情報パネル ---------- */
 .voice-panel {
   margin-top: 10px;

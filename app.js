@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "53";
+const APP_VERSION = "54";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
 const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み）
@@ -161,6 +161,7 @@ const WORDS = (() => {
 // ---- 状態 ----
 let learned = loadLearned();
 let visible = [];
+let visibleHistory = [];
 let selectedCategory = loadCategory();
 let displayMode = loadDisplayMode(); // "normal"(通常) | "no-ja"(和訳なし) | "full"(全部表示)
 
@@ -182,6 +183,7 @@ const readJaRandomBtn = document.getElementById("readJaRandomBtn");
 const readJaWordRandomBtn = document.getElementById("readJaWordRandomBtn");
 const stopBtn = document.getElementById("stopBtn");
 const modeButtons = [...document.querySelectorAll(".mode-btn")];
+const previousGroupBtn = document.getElementById("previousGroupBtn");
 const shuffleBtn = document.getElementById("shuffleBtn");
 const learnedListBtn = document.getElementById("learnedListBtn");
 const learnedPanel = document.getElementById("learnedPanel");
@@ -275,6 +277,8 @@ function initCategorySelect() {
   updateCatCount();
   catSelect.addEventListener("change", () => {
     selectedCategory = catSelect.value;
+    visibleHistory = [];
+    updatePreviousGroupButton();
     saveCategory();
     updateCatCount();
     stopSpeaking();
@@ -1012,6 +1016,7 @@ function render(fresh = false) {
   if (visible.length === 0) {
     showEmpty();
     updateStats();
+    updatePreviousGroupButton();
     return;
   }
   visible.forEach((wi, i) => cardList.appendChild(createCard(wi, i + 1)));
@@ -1037,11 +1042,16 @@ function highlightWord(word, text) {
 // 画面の12語を別の未学習単語に入れ替え（進捗は変えない）
 function reshuffleVisible() {
   stopSpeaking();
+  if (visible.length > 0) {
+    visibleHistory.push([...visible]);
+    if (visibleHistory.length > 20) visibleHistory.shift();
+  }
   const pool = shuffle(currentPoolIndexes());
   visible = pool.slice(0, CARDS_PER_PAGE);
   if (visible.length === 0) {
     showEmpty();
     updateStats();
+    updatePreviousGroupButton();
     return;
   }
   cardList.hidden = false;
@@ -1050,6 +1060,43 @@ function reshuffleVisible() {
   visible.forEach((wi, i) => cardList.appendChild(createCard(wi, i + 1)));
   updateStats();
   saveVisible();
+  updatePreviousGroupButton();
+}
+
+function updatePreviousGroupButton() {
+  if (previousGroupBtn) previousGroupBtn.disabled = visibleHistory.length === 0;
+}
+
+// 「別の12語」を押す前に表示していた単語グループへ戻す
+function restorePreviousGroup() {
+  if (visibleHistory.length === 0) return;
+  stopSpeaking();
+
+  const previous = visibleHistory.pop();
+  const valid = previous.filter((i) => {
+    if (!matchesCategory(i)) return false;
+    if (selectedCategory === LEARNED_CATEGORY) {
+      return learned.has(WORDS[i].en.toLowerCase());
+    }
+    return !learned.has(WORDS[i].en.toLowerCase());
+  });
+  const additions = shuffle(
+    currentPoolIndexes().filter((i) => !valid.includes(i))
+  ).slice(0, Math.max(0, CARDS_PER_PAGE - valid.length));
+  visible = [...valid, ...additions];
+
+  if (visible.length === 0) {
+    showEmpty();
+    updateStats();
+  } else {
+    cardList.hidden = false;
+    emptyState.hidden = true;
+    cardList.innerHTML = "";
+    visible.forEach((wi, i) => cardList.appendChild(createCard(wi, i + 1)));
+    updateStats();
+    saveVisible();
+  }
+  updatePreviousGroupButton();
 }
 
 // 覚えた単語を取り消して再出題
@@ -1120,6 +1167,7 @@ cardList.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-speak-en]");
   if (btn) speak(btn.dataset.speakEn, btn);
 });
+previousGroupBtn.addEventListener("click", restorePreviousGroup);
 shuffleBtn.addEventListener("click", reshuffleVisible);
 learnedListBtn.addEventListener("click", () => {
   const show = learnedPanel.hidden;
