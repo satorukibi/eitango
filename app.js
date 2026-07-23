@@ -6,9 +6,10 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "54";
+const APP_VERSION = "56";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
+const START_PAUSE_MS = 1000;       // 読み上げ開始前の休み（イヤホンなしでも最初の1語を聞き取るため）
 const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み）
 const TRANSITION_PAUSE_MS = 1000;  // 答えを聞いた後、次の項目へ移るまでの短い休み
 const STORAGE_KEY = "eitango.learned.v1";
@@ -453,6 +454,8 @@ function speak(text, btn) {
 // 連続読み上げ中にハイライトするカード
 let speakingCard = null;
 let speakPauseTimer = null;
+// 読み上げセッション番号。別ボタンや停止で増やす。古い onend が続きを読まないようにする
+let speakSessionId = 0;
 
 function setSpeakingCard(card) {
   if (speakingCard) speakingCard.classList.remove("speaking-now");
@@ -467,35 +470,46 @@ function clearSpeakPause() {
   }
 }
 
+function finishSpeakingSession(sessionId) {
+  if (sessionId !== speakSessionId) return;
+  clearSpeakPause();
+  setSpeakingCard(null);
+  stopBtn.hidden = true;
+}
+
 // テキスト列を順番に読み上げ（カード連動）
 // pauseSpec: 数値（毎回同じ休み）または (finishedIdx) => ms を返す関数（ステップごとに休みを変える）
 function speakSequence(texts, cards, pauseSpec = 0, makeUtterance = makeEnUtterance) {
   if (!synth) return;
+  // 直前の読み上げを完全に無効化してから新しい読み上げを開始
   clearSpeakPause();
   synth.cancel();
+  const sessionId = ++speakSessionId;
   stopBtn.hidden = false;
   const getPauseMs = typeof pauseSpec === "function" ? pauseSpec : () => pauseSpec;
   let idx = 0;
   const next = () => {
+    if (sessionId !== speakSessionId) return;
     if (idx >= texts.length) {
-      setSpeakingCard(null);
-      stopBtn.hidden = true;
+      finishSpeakingSession(sessionId);
       return;
     }
     setSpeakingCard(cards[idx] || null);
     const u = makeUtterance(texts[idx], idx);
     const finishedIdx = idx;
     const advance = () => {
+      // cancel 時に古い onend/onerror が飛ぶので、現行セッション以外は無視
+      if (sessionId !== speakSessionId) return;
       idx++;
       if (idx >= texts.length) {
-        setSpeakingCard(null);
-        stopBtn.hidden = true;
+        finishSpeakingSession(sessionId);
         return;
       }
       const pauseMs = getPauseMs(finishedIdx);
       if (pauseMs > 0) {
         speakPauseTimer = setTimeout(() => {
           speakPauseTimer = null;
+          if (sessionId !== speakSessionId) return;
           next();
         }, pauseMs);
       } else {
@@ -506,7 +520,12 @@ function speakSequence(texts, cards, pauseSpec = 0, makeUtterance = makeEnUttera
     u.onerror = advance;
     synth.speak(u);
   };
-  next();
+  // ボタンを押してから最初の1語まで1秒空ける
+  speakPauseTimer = setTimeout(() => {
+    speakPauseTimer = null;
+    if (sessionId !== speakSessionId) return;
+    next();
+  }, START_PAUSE_MS);
 }
 
 // 2段階パターン（1項目目→3秒→2項目目→1秒→次）用の休み時間
@@ -659,6 +678,7 @@ function speakJaThenWordRandom() {
 }
 
 function stopSpeaking() {
+  speakSessionId++; // 進行中の読み上げコールバックを無効化
   clearSpeakPause();
   if (synth) synth.cancel();
   setSpeakingCard(null);
