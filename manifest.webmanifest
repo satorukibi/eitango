@@ -3,7 +3,7 @@
   "short_name": "どこでも英単語",
   "description": "AI・戦争などニュース頻出の中級英単語を学べるアプリ",
   "id": "/eitango-v31",
-  "start_url": "./index.html?v=56&source=pwa",
+  "start_url": "./index.html?v=57&source=pwa",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",

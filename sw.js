@@ -1,5 +1,5 @@
 // オフライン対応 Service Worker（オンライン時は常に最新版を優先）
-const CACHE = "eitango-v56";
+const CACHE = "eitango-v57";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const ASSETS = [
   "./words.js",
   "./words_extra.js",
   "./words_extra2.js",
+  "./words_new.js",
   "./manifest.webmanifest",
   "./header-logo.svg",
   "./header-cat.png"
