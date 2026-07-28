@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "58";
+const APP_VERSION = "60";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
 const START_PAUSE_MS = 1000;       // 読み上げ開始前の休み（イヤホンなしでも最初の1語を聞き取るため）
@@ -188,6 +188,8 @@ const previousGroupBtn = document.getElementById("previousGroupBtn");
 const shuffleBtn = document.getElementById("shuffleBtn");
 const learnedListBtn = document.getElementById("learnedListBtn");
 const learnedPanel = document.getElementById("learnedPanel");
+const progressCodeBtn = document.getElementById("progressCodeBtn");
+const progressCodePanel = document.getElementById("progressCodePanel");
 const resetBtn = document.getElementById("resetBtn");
 const restartBtn = document.getElementById("restartBtn");
 const progressPctEl = document.getElementById("progressPct");
@@ -1158,6 +1160,47 @@ function renderLearnedPanel() {
   });
 }
 
+// ---- 進捗コード（「覚えた」単語を有料版へ引っ越すための書き出し） ----
+// 単語（英語表記）のリストをbase64化しただけの簡単なコード。レベル("BEG"=初級 / "INT"=中級)を
+// 埋め込むことで、対象レベルが異なるアプリに読み込ませてしまうのを防ぐ。
+// 無料版は「引っ越し元」なので書き出しのみ（読み込みは有料版側に用意する）
+const PROGRESS_CODE_PREFIX = "EITG1:";
+const PROGRESS_CODE_LEVEL = "INT";
+
+function buildProgressCode() {
+  const json = JSON.stringify([...learned]);
+  return `${PROGRESS_CODE_PREFIX}${PROGRESS_CODE_LEVEL}:${btoa(unescape(encodeURIComponent(json)))}`;
+}
+
+function renderProgressCodePanel() {
+  progressCodePanel.innerHTML = `
+    <p class="progress-code-desc">中級編ベーシック（無料版・本ソフト）で「覚えた」単語を中級編プレミアム（有料版）に引っ越すためのコードです。ここで「覚えた」単語を書き出して、次にプレミアムの「進捗コード」を開き、「覚えた単語を設定する」ボタンを押して引っ越しを完了してください。</p>
+    <div class="progress-code-section">
+      <button id="exportCodeBtn" class="btn btn-primary">覚えた単語のコードを作成してコピー</button>
+      <textarea id="exportCodeOutput" class="progress-code-textarea" readonly rows="3" placeholder="ボタンを押すと、ここにコードが表示されます（自動でコピーされます）"></textarea>
+      <span id="exportCodeStatus" class="progress-code-status"></span>
+    </div>
+  `;
+
+  const exportCodeBtn = progressCodePanel.querySelector("#exportCodeBtn");
+  const exportCodeOutput = progressCodePanel.querySelector("#exportCodeOutput");
+  const exportCodeStatus = progressCodePanel.querySelector("#exportCodeStatus");
+
+  exportCodeBtn.addEventListener("click", async () => {
+    const code = buildProgressCode();
+    exportCodeOutput.value = code;
+    try {
+      await navigator.clipboard.writeText(code);
+      exportCodeStatus.textContent = `${learned.size}語のコードをコピーしました。プレミアム版を開き「覚えた単語を設定する」を押してください。`;
+      exportCodeStatus.className = "progress-code-status ok";
+    } catch (e) {
+      exportCodeOutput.select();
+      exportCodeStatus.textContent = "自動コピーできませんでした。表示されているコードを選択してコピーしてください。";
+      exportCodeStatus.className = "progress-code-status ng";
+    }
+  });
+}
+
 // ---- イベント ----
 readWordsSeqBtn.addEventListener("click", speakWordsSequential);
 readWordJaSeqBtn.addEventListener("click", speakWordThenJaSequential);
@@ -1193,7 +1236,15 @@ learnedListBtn.addEventListener("click", () => {
   const show = learnedPanel.hidden;
   learnedPanel.hidden = !show;
   voicePanel.hidden = true;
+  progressCodePanel.hidden = true;
   if (show) renderLearnedPanel();
+});
+progressCodeBtn.addEventListener("click", () => {
+  const show = progressCodePanel.hidden;
+  progressCodePanel.hidden = !show;
+  learnedPanel.hidden = true;
+  voicePanel.hidden = true;
+  if (show) renderProgressCodePanel();
 });
 restartBtn.addEventListener("click", () => {
   learned = new Set();
@@ -1250,6 +1301,7 @@ voiceInfoBtn.addEventListener("click", () => {
   const show = voicePanel.hidden;
   voicePanel.hidden = !show;
   learnedPanel.hidden = true;
+  progressCodePanel.hidden = true;
   if (show) renderVoicePanel();
 });
 
