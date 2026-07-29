@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "60";
+const APP_VERSION = "61";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 const CARDS_PER_PAGE = 12;
 const START_PAUSE_MS = 1000;       // 読み上げ開始前の休み（イヤホンなしでも最初の1語を聞き取るため）
@@ -535,6 +535,11 @@ function pairPauseFn(finishedIdx) {
   return finishedIdx % 2 === 0 ? SELF_RECALL_PAUSE_MS : TRANSITION_PAUSE_MS;
 }
 
+// 3段階パターン（1項目目→3秒→2項目目→1秒→3項目目→1秒→次）用の休み時間
+function triplePauseFn(finishedIdx) {
+  return finishedIdx % 3 === 0 ? SELF_RECALL_PAUSE_MS : TRANSITION_PAUSE_MS;
+}
+
 function visibleCards() {
   return [...cardList.querySelectorAll(".word-card")];
 }
@@ -597,17 +602,22 @@ function speakWordThenJaRandom() {
   );
 }
 
-// 単語→例文（順番通り）：単語を読む→3秒→例文を読む→1秒→次の単語
+// 単語→和訳→例文（順番通り）：単語を読む→3秒→和訳を読む→1秒→例文を読む→1秒→次の単語
 function speakWordThenExample() {
   const cards = visibleCards();
   const texts = [];
   const highlightCards = [];
   for (const c of cards) {
     const w = WORDS[Number(c.dataset.index)];
-    texts.push(w.en, w.ex);
-    highlightCards.push(c, c);
+    texts.push(w.en, w.ja, w.ex);
+    highlightCards.push(c, c, c);
   }
-  speakSequence(texts, highlightCards, pairPauseFn);
+  speakSequence(
+    texts,
+    highlightCards,
+    triplePauseFn,
+    (text, idx) => (idx % 3 === 1 ? makeJaUtterance(text) : makeEnUtterance(text))
+  );
 }
 
 // 例文和訳（順番通り）：例文和訳を読む→3秒→次の例文和訳
