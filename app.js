@@ -6,7 +6,7 @@
 //  - 「覚えた」で別の単語と入れ替え（進捗はローカル保存）
 // ============================================================
 
-const APP_VERSION = "62";
+const APP_VERSION = "63";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
 
 // サーバー側のバージョン番号が、今表示中のバージョンより「本当に新しいか」を数値で判定する。
@@ -1334,6 +1334,26 @@ if (appVersionEl) appVersionEl.textContent = `v${APP_VERSION}`;
 
 initCategorySelect();
 render();
+warnIfInAppBrowser();
+
+// ---- LINE等のアプリ内ブラウザは読み上げ非対応・表示崩れが起きやすいため案内を出す ----
+function warnIfInAppBrowser() {
+  const ua = navigator.userAgent || "";
+  const isInAppBrowser = /\bLine\//i.test(ua) || /FBAN|FBAV|Instagram|MicroMessenger|Twitter/i.test(ua);
+  if (!isInAppBrowser) return;
+  if (localStorage.getItem("eitango.hideInAppBrowserWarning") === "1") return;
+
+  const bar = document.createElement("div");
+  bar.className = "in-app-browser-warning";
+  bar.innerHTML =
+    "<span>⚠️ アプリ内ブラウザで開いています。読み上げや表示が正しく動作しない場合は、右上または右下の「…」メニューから「他のブラウザで開く」を選んでください。</span>" +
+    '<button type="button" aria-label="閉じる">✕</button>';
+  bar.querySelector("button").addEventListener("click", () => {
+    bar.remove();
+    localStorage.setItem("eitango.hideInAppBrowserWarning", "1");
+  });
+  document.body.insertBefore(bar, document.body.firstChild);
+}
 
 // ---- 最新版への更新（キャッシュ削除） ----
 let swRefreshing = false;

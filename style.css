@@ -32,6 +32,28 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ---------- アプリ内ブラウザ警告 ---------- */
+.in-app-browser-warning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #78350f;
+  color: #fef3c7;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left));
+}
+.in-app-browser-warning span { flex: 1; }
+.in-app-browser-warning button {
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  color: #fef3c7;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
 /* ---------- ヘッダー ---------- */
 .app-header {
   position: sticky;
@@ -457,6 +479,8 @@ html, body {
 }
 
 .btn-line {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -611,7 +635,8 @@ html, body {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  white-space: nowrap;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 .reveal-btn:active { transform: scale(0.97); }
 .reveal-btn.done { opacity: 0.55; }
@@ -625,7 +650,8 @@ html, body {
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  white-space: nowrap;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 .learned-btn:hover { background: var(--green-dark); }
 .learned-btn:active { transform: scale(0.97); }
