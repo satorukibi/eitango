@@ -8,6 +8,18 @@
 
 const APP_VERSION = "62";
 const INSTALLED_VER_KEY = "eitango.installedVersion";
+
+// サーバー側のバージョン番号が、今表示中のバージョンより「本当に新しいか」を数値で判定する。
+// 単純な文字列の不一致(!==)で判定すると、キャッシュ遅延や記述ミスで古い番号が
+// 一時的に返ってきた場合にも「更新あり」と誤表示してしまうため、必ず数値の大小で比較する。
+function isNewerVersion(remoteVer, currentVer) {
+  const remoteNum = parseInt(remoteVer, 10);
+  const currentNum = parseInt(currentVer, 10);
+  if (Number.isNaN(remoteNum) || Number.isNaN(currentNum)) {
+    return String(remoteVer) !== String(currentVer);
+  }
+  return remoteNum > currentNum;
+}
 const CARDS_PER_PAGE = 12;
 const START_PAUSE_MS = 1000;       // 読み上げ開始前の休み（イヤホンなしでも最初の1語を聞き取るため）
 const SELF_RECALL_PAUSE_MS = 3000; // 自分で思い出す時間（1項目目の後の休み）
@@ -1381,7 +1393,7 @@ async function ensureLatestVersion(silent = false) {
   } catch (e) {
     if (!navigator.onLine) return;
   }
-  if (serverVer === APP_VERSION) {
+  if (!isNewerVersion(serverVer, APP_VERSION)) {
     markVersionInstalled();
     return;
   }
@@ -1428,7 +1440,7 @@ function showUpdateBanner(newVer) {
 async function checkForUpdate() {
   try {
     const serverVer = await fetchServerVersion();
-    if (serverVer !== APP_VERSION) {
+    if (isNewerVersion(serverVer, APP_VERSION)) {
       showUpdateBanner(serverVer);
       if (updateBtn) updateBtn.textContent = `🔄 更新 (v${serverVer}あり)`;
       if (isStandaloneApp() && navigator.onLine) {
